@@ -25,8 +25,11 @@ export async function ensureInitialFolder() {
 }
 
 export function selectInitialFolder() {
-  const sortedFolders = getSortedFolders();
-  state.selectedFolderId = sortedFolders[0] ? sortedFolders[0].id : null;
+  state.folderNavLevel = "parents";
+  state.activeParentFolderId = null;
+  state.activeChildFolderId = null;
+  state.selectedFolderId = null;
+  state.selectedNoteId = null;
 }
 
 export async function createParentFolder() {
@@ -37,6 +40,9 @@ export async function createParentFolder() {
   const folder = createFolderObject(cleanName, null);
   await saveFolder(folder);
   state.folders.push(folder);
+  state.folderNavLevel = "children";
+  state.activeParentFolderId = folder.id;
+  state.activeChildFolderId = null;
   state.selectedFolderId = folder.id;
   state.selectedNoteId = null;
   appActions.renderAll();
@@ -56,12 +62,19 @@ export async function createChildFolder() {
   const folder = createFolderObject(cleanName, parentFolder.id);
   await saveFolder(folder);
   state.folders.push(folder);
-  state.selectedFolderId = folder.id;
+  state.folderNavLevel = "children";
+  state.activeParentFolderId = parentFolder.id;
+  state.activeChildFolderId = null;
+  state.selectedFolderId = parentFolder.id;
   state.selectedNoteId = null;
   appActions.renderAll();
 }
 
 function getFolderForChildCreation() {
+  if (state.activeParentFolderId) {
+    return state.folders.find((folder) => folder.id === state.activeParentFolderId) || null;
+  }
+
   const selectedFolder = getSelectedFolder();
   if (!selectedFolder) return null;
   return selectedFolder.parentId ? null : selectedFolder;
@@ -106,12 +119,14 @@ export async function deleteSelectedFolder() {
   state.folders = state.folders.filter((item) => !targetFolderIds.includes(item.id));
   await deleteUnusedAssets(maybeUnusedAssetIds);
 
+  state.folderNavLevel = "parents";
+  state.activeParentFolderId = null;
+  state.activeChildFolderId = null;
   state.selectedNoteId = null;
-  state.selectedFolderId = state.folders[0] ? getSortedFolders()[0].id : null;
+  state.selectedFolderId = null;
 
   if (state.folders.length === 0) {
     await ensureInitialFolder();
-    state.selectedFolderId = state.folders[0].id;
   }
 
   appActions.renderAll();
@@ -119,6 +134,21 @@ export async function deleteSelectedFolder() {
 
 export function renderFolderList() {
   elements.folderList.innerHTML = "";
+
+  if (state.folderNavLevel === "children") {
+    renderChildFolderScreen();
+    return;
+  }
+
+  if (state.folderNavLevel === "notes") {
+    renderNotesFolderScreen();
+    return;
+  }
+
+  renderParentFolderScreen();
+}
+
+function renderParentFolderScreen() {
   const sortedParents = getSortedFolders().filter((folder) => !folder.parentId);
 
   if (sortedParents.length === 0) {
@@ -126,36 +156,196 @@ export function renderFolderList() {
     return;
   }
 
-  sortedParents.forEach((parent) => {
-    elements.folderList.appendChild(createFolderButton(parent, false));
+  const header = createNavScreenHeader(null, "親フォルダ");
+  elements.folderList.appendChild(header);
 
-    const children = getSortedFolders().filter((folder) => folder.parentId === parent.id);
+  const list = document.createElement("div");
+  list.className = "nav-list";
+
+  sortedParents.forEach((parent) => {
+    list.appendChild(createParentFolderButton(parent));
+  });
+
+  elements.folderList.appendChild(list);
+}
+
+function renderChildFolderScreen() {
+  const parent = getActiveParentFolder();
+  if (!parent) {
+    goToParentFolderList();
+    return;
+  }
+
+  elements.folderList.appendChild(createNavScreenHeader("親フォルダへ戻る", parent.name, goToParentFolderList));
+
+  const list = document.createElement("div");
+  list.className = "nav-list";
+  list.appendChild(createParentNotesButton(parent));
+
+  const children = getSortedFolders().filter((folder) => folder.parentId === parent.id);
+  if (children.length === 0) {
+    list.appendChild(createNavEmptyMessage("子フォルダがありません。"));
+  } else {
     children.forEach((child) => {
-      elements.folderList.appendChild(createFolderButton(child, true));
+      list.appendChild(createChildFolderButton(child));
     });
+  }
+
+  elements.folderList.appendChild(list);
+}
+
+function renderNotesFolderScreen() {
+  const folder = getSelectedFolder();
+  if (!folder) {
+    goToParentFolderList();
+    return;
+  }
+
+  const backLabel = folder.parentId ? "子フォルダへ戻る" : "子フォルダ一覧へ戻る";
+  elements.folderList.appendChild(createNavScreenHeader(backLabel, folder.name, goBackFromNotes));
+
+  const info = document.createElement("div");
+  info.className = "nav-current-folder";
+  info.textContent = "中央の一覧からメモを選択してください。";
+  elements.folderList.appendChild(info);
+}
+
+function createParentFolderButton(parent) {
+  const childCount = state.folders.filter((folder) => folder.parentId === parent.id).length;
+  const noteCount = countNotesInFolder(parent.id);
+  return createNavListItem({
+    title: parent.name,
+    meta: `子フォルダ ${childCount} / メモ ${noteCount}`,
+    actionText: "＞",
+    onClick: () => openParentFolder(parent.id)
   });
 }
 
-export function createFolderButton(folder, isChild) {
+function createParentNotesButton(parent) {
+  return createNavListItem({
+    title: "このフォルダのメモを見る",
+    meta: `${countNotesInFolder(parent.id)}件`,
+    actionText: "＞",
+    onClick: () => openParentNotes(parent.id)
+  });
+}
+
+function createChildFolderButton(child) {
+  return createNavListItem({
+    title: child.name,
+    meta: `メモ ${countNotesInFolder(child.id)}`,
+    actionText: "＞",
+    onClick: () => openChildFolder(child.id)
+  });
+}
+
+function createNavListItem({ title, meta, actionText, onClick }) {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = `folder-item${isChild ? " child-folder" : ""}${folder.id === state.selectedFolderId ? " selected" : ""}`;
-  button.addEventListener("click", () => {
-    state.selectedFolderId = folder.id;
-    state.selectedNoteId = null;
-    appActions.renderAll();
-  });
+  button.className = "nav-list-item";
+  button.addEventListener("click", onClick);
 
-  const name = document.createElement("span");
-  name.className = "folder-name";
-  name.textContent = folder.name;
+  const body = document.createElement("span");
+  body.className = "nav-list-item-body";
 
-  const depth = document.createElement("span");
-  depth.className = "folder-depth";
-  depth.textContent = isChild ? "子" : "親";
+  const titleElement = document.createElement("span");
+  titleElement.className = "nav-list-item-title";
+  titleElement.textContent = title;
+  body.appendChild(titleElement);
 
-  button.append(name, depth);
+  if (meta) {
+    const metaElement = document.createElement("span");
+    metaElement.className = "nav-list-item-meta";
+    metaElement.textContent = meta;
+    body.appendChild(metaElement);
+  }
+
+  const action = document.createElement("span");
+  action.className = "nav-list-item-action";
+  action.textContent = actionText;
+
+  button.append(body, action);
   return button;
+}
+
+function createNavScreenHeader(backText, title, backAction) {
+  const header = document.createElement("div");
+  header.className = "nav-screen-header";
+
+  if (backText && backAction) {
+    const backButton = document.createElement("button");
+    backButton.type = "button";
+    backButton.className = "nav-back-button";
+    backButton.textContent = `＜ ${backText}`;
+    backButton.addEventListener("click", backAction);
+    header.appendChild(backButton);
+  }
+
+  const titleElement = document.createElement("div");
+  titleElement.className = "nav-screen-title";
+  titleElement.textContent = title;
+  header.appendChild(titleElement);
+  return header;
+}
+
+function createNavEmptyMessage(message) {
+  const item = document.createElement("div");
+  item.className = "nav-empty-message";
+  item.textContent = message;
+  return item;
+}
+
+function openParentFolder(parentFolderId) {
+  state.folderNavLevel = "children";
+  state.activeParentFolderId = parentFolderId;
+  state.activeChildFolderId = null;
+  state.selectedFolderId = parentFolderId;
+  state.selectedNoteId = null;
+  appActions.renderAll();
+}
+
+function openParentNotes(parentFolderId) {
+  state.folderNavLevel = "notes";
+  state.activeParentFolderId = parentFolderId;
+  state.activeChildFolderId = null;
+  state.selectedFolderId = parentFolderId;
+  state.selectedNoteId = null;
+  appActions.renderAll();
+}
+
+function openChildFolder(childFolderId) {
+  const child = state.folders.find((folder) => folder.id === childFolderId);
+  state.folderNavLevel = "notes";
+  state.activeParentFolderId = child ? child.parentId : state.activeParentFolderId;
+  state.activeChildFolderId = childFolderId;
+  state.selectedFolderId = childFolderId;
+  state.selectedNoteId = null;
+  appActions.renderAll();
+}
+
+function goToParentFolderList() {
+  state.folderNavLevel = "parents";
+  state.activeParentFolderId = null;
+  state.activeChildFolderId = null;
+  state.selectedFolderId = null;
+  state.selectedNoteId = null;
+  appActions.renderAll();
+}
+
+function goBackFromNotes() {
+  state.folderNavLevel = "children";
+  state.activeChildFolderId = null;
+  state.selectedFolderId = state.activeParentFolderId;
+  state.selectedNoteId = null;
+  appActions.renderAll();
+}
+
+function getActiveParentFolder() {
+  return state.folders.find((folder) => folder.id === state.activeParentFolderId) || null;
+}
+
+function countNotesInFolder(folderId) {
+  return state.notes.filter((note) => note.folderId === folderId).length;
 }
 
 export function getSelectedFolder() {

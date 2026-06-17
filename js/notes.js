@@ -20,7 +20,7 @@ export function createNoteObject(folderId) {
 }
 
 export async function createNoteInSelectedFolder() {
-  if (!state.selectedFolderId) return;
+  if (!state.selectedFolderId || state.folderNavLevel !== "notes") return;
 
   const note = createNoteObject(state.selectedFolderId);
   await saveNote(note);
@@ -63,6 +63,12 @@ export function renderNoteList() {
   elements.noteList.innerHTML = "";
 
   const selectedFolder = getSelectedFolder();
+  if (state.folderNavLevel !== "notes") {
+    elements.selectedFolderName.textContent = "メモ一覧";
+    elements.noteList.appendChild(createEmptyList("フォルダを開くと、この場所にメモ一覧が表示されます。"));
+    return;
+  }
+
   elements.selectedFolderName.textContent = selectedFolder ? selectedFolder.name : "未選択";
 
   const folderNotes = getNotesInSelectedFolder();
@@ -226,13 +232,14 @@ export function setSaveStatus(text, stateClass) {
 export function updateActionButtons() {
   const selectedFolder = getSelectedFolder();
   const hasFolder = Boolean(selectedFolder);
-  const canAddChild = hasFolder && !selectedFolder.parentId;
+  const canAddChild = Boolean(state.activeParentFolderId);
   const hasNote = Boolean(getSelectedNote());
+  const canCreateNote = hasFolder && state.folderNavLevel === "notes";
 
   elements.addChildFolderButton.disabled = !canAddChild;
   elements.renameFolderButton.disabled = !hasFolder;
   elements.deleteFolderButton.disabled = !hasFolder;
-  elements.addNoteButton.disabled = !hasFolder;
+  elements.addNoteButton.disabled = !canCreateNote;
   elements.deleteSelectedNoteButton.disabled = !hasNote;
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
