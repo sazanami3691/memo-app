@@ -22,6 +22,7 @@ import {
   deleteSelectedFolder,
   ensureInitialFolder,
   goBackFromNotes,
+  goToParentFolderList,
   renameSelectedFolder,
   renderFolderList,
   selectInitialFolder
@@ -69,8 +70,8 @@ function collectElements() {
   elements.folderList = document.getElementById("folderList");
   elements.noteList = document.getElementById("noteList");
   elements.selectedFolderName = document.getElementById("selectedFolderName");
-  elements.noteListBackButton = document.getElementById("noteListBackButton");
-  elements.editorBackButton = document.getElementById("editorBackButton");
+  elements.screenBackButton = document.getElementById("screenBackButton");
+  elements.screenHeaderTitle = document.getElementById("screenHeaderTitle");
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
@@ -127,13 +128,7 @@ function registerEventListeners() {
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
   elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
   elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
-  elements.noteListBackButton.addEventListener("click", () => {
-    goBackFromNotes();
-  });
-  elements.editorBackButton.addEventListener("click", () => {
-    state.appView = "notes";
-    renderAll();
-  });
+  elements.screenBackButton.addEventListener("click", handleScreenBack);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -197,9 +192,11 @@ function setControlPanelOpen(isOpen) {
 
 function renderControlPanelState() {
   elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
-  elements.controlPanelToggle.textContent = state.controlPanelOpen
-    ? "操作メニューを閉じる"
-    : "操作メニューを開く";
+  elements.controlPanelToggle.textContent = "⚙";
+  elements.controlPanelToggle.setAttribute(
+    "aria-label",
+    state.controlPanelOpen ? "操作メニューを閉じる" : "操作メニューを開く"
+  );
   elements.controlPanelToggle.setAttribute("aria-expanded", state.controlPanelOpen ? "true" : "false");
 }
 
@@ -209,10 +206,72 @@ function renderAll() {
   renderEditor();
   updateActionButtons();
   renderAppView();
+  renderScreenHeader();
 }
 
 function renderAppView() {
   elements.folderPanel.classList.toggle("hidden-screen", state.appView !== "folders");
   elements.noteListPanel.classList.toggle("hidden-screen", state.appView !== "notes");
   elements.editorPanel.classList.toggle("hidden-screen", state.appView !== "editor");
+}
+
+function renderScreenHeader() {
+  const title = getScreenTitle();
+  const backLabel = getScreenBackLabel();
+
+  elements.screenHeaderTitle.textContent = title;
+  elements.screenBackButton.textContent = backLabel || "";
+  elements.screenBackButton.classList.toggle("hidden", !backLabel);
+}
+
+function handleScreenBack() {
+  if (state.appView === "editor") {
+    state.appView = "notes";
+    renderAll();
+    return;
+  }
+
+  if (state.appView === "notes" || state.folderNavLevel === "notes") {
+    goBackFromNotes();
+    return;
+  }
+
+  if (state.folderNavLevel === "children") {
+    goToParentFolderList();
+  }
+}
+
+function getScreenTitle() {
+  if (state.appView === "editor") {
+    const note = state.notes.find((item) => item.id === state.selectedNoteId);
+    return note ? (note.title || "無題") : "メモ";
+  }
+
+  if (state.appView === "notes") {
+    const folder = state.folders.find((item) => item.id === state.selectedFolderId);
+    return folder ? folder.name : "メモ一覧";
+  }
+
+  if (state.folderNavLevel === "children") {
+    const parent = state.folders.find((item) => item.id === state.activeParentFolderId);
+    return parent ? parent.name : "子フォルダ";
+  }
+
+  return "親フォルダ";
+}
+
+function getScreenBackLabel() {
+  if (state.appView === "editor") {
+    return "＜ メモ一覧へ戻る";
+  }
+
+  if (state.appView === "notes" || state.folderNavLevel === "notes") {
+    return "＜ 子フォルダへ戻る";
+  }
+
+  if (state.folderNavLevel === "children") {
+    return "＜ 親フォルダへ戻る";
+  }
+
+  return "";
 }

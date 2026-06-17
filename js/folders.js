@@ -180,7 +180,7 @@ function renderChildFolderScreen() {
     return;
   }
 
-  elements.folderList.appendChild(createNavScreenHeader("親フォルダへ戻る", parent.name, goToParentFolderList));
+  elements.folderList.appendChild(createNavScreenHeader(null, parent.name));
 
   const list = document.createElement("div");
   list.className = "nav-list";
@@ -205,8 +205,7 @@ function renderNotesFolderScreen() {
     return;
   }
 
-  const backLabel = folder.parentId ? "子フォルダへ戻る" : "子フォルダ一覧へ戻る";
-  elements.folderList.appendChild(createNavScreenHeader(backLabel, folder.name, goBackFromNotes));
+  elements.folderList.appendChild(createNavScreenHeader(null, folder.name));
 
   const info = document.createElement("div");
   info.className = "nav-current-folder";

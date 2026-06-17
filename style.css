@@ -76,7 +76,41 @@ button:disabled {
 }
 
 .app-controls {
+  position: relative;
   margin-bottom: 10px;
+}
+
+.screen-header {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(44px, auto);
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 10px;
+}
+
+.screen-header-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.screen-header-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .column {
@@ -99,6 +133,7 @@ button:disabled {
 }
 
 .column-header,
+.content-header,
 .editor-header,
 .block-toolbar {
   display: flex;
@@ -117,6 +152,7 @@ button:disabled {
 
 .column-header h1,
 .column-header h2,
+.content-header h2,
 .editor-header h2,
 .block-toolbar h3 {
   margin: 0;
@@ -150,17 +186,38 @@ button:disabled {
   margin-bottom: 14px;
 }
 
-.control-panel-toggle {
-  width: 100%;
+.control-panel-toggle,
+.control-menu-icon-button {
   min-height: 44px;
-  margin-bottom: 8px;
   font-weight: 700;
+}
+
+.control-menu-icon-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  padding: 0;
+  font-size: 1.12rem;
+  line-height: 1;
+}
+
+.control-panel-toggle {
+  min-height: 44px;
 }
 
 .control-panel {
   display: grid;
   gap: 10px;
-  margin-bottom: 12px;
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 28px));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 10px;
 }
 
 .control-panel.collapsed {
@@ -244,8 +301,9 @@ button:disabled {
 .nav-screen-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  justify-content: center;
+  min-height: 32px;
+  margin-bottom: 12px;
 }
 
 .nav-back-button {
@@ -733,5 +791,14 @@ button:disabled {
 
   .column {
     max-height: none;
+  }
+
+  .screen-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .screen-header-title {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }
