@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ローカルWebメモ Phase 3</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="column folder-column" aria-label="フォルダ一覧">
+      <header class="column-header">
+        <div>
+          <p class="eyebrow">Folders</p>
+          <h1>フォルダ</h1>
+        </div>
+        <button id="addParentFolderButton" class="primary-button" type="button">親フォルダ作成</button>
+      </header>
+
+      <div class="folder-actions">
+        <button id="addChildFolderButton" type="button">子フォルダ作成</button>
+        <button id="renameFolderButton" type="button">名前変更</button>
+        <button id="deleteFolderButton" class="danger-button" type="button">削除</button>
+      </div>
+
+      <div class="backup-actions">
+        <button id="exportBackupButton" type="button">バックアップ書き出し</button>
+        <button id="importBackupButton" type="button">バックアップ読み込み</button>
+      </div>
+
+      <nav id="folderList" class="folder-list" aria-live="polite"></nav>
+    </aside>
+
+    <main class="column note-list-column" aria-label="メモ一覧">
+      <header class="column-header">
+        <div>
+          <p class="eyebrow">Notes</p>
+          <h2 id="selectedFolderName">未選択</h2>
+        </div>
+        <button id="addNoteButton" class="primary-button" type="button">新規メモ</button>
+      </header>
+
+      <div id="noteList" class="note-list" aria-live="polite"></div>
+    </main>
+
+    <section class="column editor-column" aria-label="メモ編集">
+      <header class="editor-header">
+        <div>
+          <p class="eyebrow">Editor</p>
+          <h2>編集</h2>
+        </div>
+        <span id="saveStatus" class="save-status">保存済み</span>
+      </header>
+
+      <div id="emptyEditorMessage" class="empty-editor">
+        フォルダを選んでメモを作成、またはメモを選択してください。
+      </div>
+
+      <form id="editorForm" class="editor-form hidden">
+        <label class="field-label" for="noteTitleInput">タイトル</label>
+        <input id="noteTitleInput" class="title-input" type="text" autocomplete="off" placeholder="メモタイトル">
+
+        <div class="block-toolbar">
+          <h3>本文ブロック</h3>
+          <div class="toolbar-actions">
+            <button id="addTextBlockButton" class="primary-button" type="button">テキストブロック追加</button>
+            <button id="addImageBlockButton" class="primary-button" type="button">画像ブロック追加</button>
+            <button id="addDrawingBlockButton" class="primary-button" type="button">手書きブロック追加</button>
+          </div>
+        </div>
+
+        <div id="blockList" class="block-list" aria-live="polite"></div>
+      </form>
+    </section>
+  </div>
+
+  <input id="imageFileInput" class="hidden" type="file" accept="image/*">
+  <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
+
+  <div id="imageModal" class="image-modal hidden" aria-hidden="true">
+    <div class="image-modal-content" role="dialog" aria-modal="true" aria-label="画像プレビュー">
+      <button id="imageModalClose" class="image-modal-close" type="button">閉じる</button>
+      <img id="imageModalImage" alt="拡大画像">
+    </div>
+  </div>
+
+  <div id="drawingModal" class="drawing-modal hidden" aria-hidden="true">
+    <div class="drawing-modal-content" role="dialog" aria-modal="true" aria-label="手書きメモ">
+      <header class="drawing-modal-header">
+        <h2>手書きメモ</h2>
+        <button id="drawingModalCloseButton" type="button">閉じる</button>
+      </header>
+
+      <div class="drawing-toolbar" aria-label="手書きツール">
+        <button id="drawingPenButton" class="active-tool" type="button">ペン</button>
+        <button id="drawingEraserButton" type="button">消しゴム</button>
+        <button id="drawingSizeSmallButton" type="button">細</button>
+        <button id="drawingSizeMediumButton" class="active-tool" type="button">中</button>
+        <button id="drawingSizeLargeButton" type="button">太</button>
+        <button id="drawingUndoButton" type="button">Undo</button>
+        <button id="drawingRedoButton" type="button">Redo</button>
+        <button id="drawingClearButton" class="danger-button" type="button">全消し</button>
+      </div>
+
+      <div class="drawing-canvas-wrap">
+        <canvas id="drawingCanvas" width="1200" height="800"></canvas>
+      </div>
+
+      <footer class="drawing-modal-footer">
+        <button id="drawingSaveButton" class="primary-button" type="button">保存</button>
+        <button id="drawingCancelButton" type="button">キャンセル</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
