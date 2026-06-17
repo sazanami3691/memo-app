@@ -90,6 +90,39 @@ export function renderDrawingBlock(block, index, blockCount) {
   return wrapper;
 }
 
+export function renderPreviewDrawingBlock(block) {
+  const asset = getAssetById(block.assetId);
+  if (!asset) {
+    return createPreviewMissingAsset("手書きデータが見つかりません");
+  }
+
+  const wrapper = document.createElement("figure");
+  wrapper.className = "preview-drawing-wrap";
+
+  const image = document.createElement("img");
+  image.className = "preview-drawing";
+  image.src = asset.dataUrl;
+  image.alt = block.caption || "手書きメモ";
+  image.addEventListener("click", () => openImageModal(asset.dataUrl));
+  wrapper.appendChild(image);
+
+  if (block.caption) {
+    const caption = document.createElement("figcaption");
+    caption.className = "preview-caption";
+    caption.textContent = block.caption;
+    wrapper.appendChild(caption);
+  }
+
+  return wrapper;
+}
+
+function createPreviewMissingAsset(messageText) {
+  const message = document.createElement("div");
+  message.className = "preview-missing-asset";
+  message.textContent = messageText;
+  return message;
+}
+
 export async function openDrawingModal(options = {}) {
   if (!state.selectedNoteId) return;
 

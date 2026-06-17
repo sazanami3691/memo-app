@@ -1,7 +1,7 @@
 "use strict";
 
 import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
-import { createTextBlock, renderBlock } from "./blocks.js";
+import { createTextBlock, renderBlock, renderPreviewBlock } from "./blocks.js";
 import { deleteNote, saveNote } from "./db.js";
 import { getSelectedFolder } from "./folders.js";
 import { AUTO_SAVE_DELAY, elements, state } from "./state.js";
@@ -26,6 +26,7 @@ export async function createNoteInSelectedFolder() {
   await saveNote(note);
   state.notes.push(note);
   state.selectedNoteId = note.id;
+  state.editorMode = "edit";
   renderNoteList();
   renderEditor();
   updateActionButtons();
@@ -74,6 +75,7 @@ export function renderNoteList() {
     selectButton.className = "note-item";
     selectButton.addEventListener("click", () => {
       state.selectedNoteId = note.id;
+      state.editorMode = "preview";
       renderNoteList();
       renderEditor();
       updateActionButtons();
@@ -105,6 +107,8 @@ export function renderEditor() {
 
   if (!note) {
     elements.emptyEditorMessage.classList.remove("hidden");
+    elements.editorModeSwitch.classList.add("hidden");
+    elements.previewArea.classList.add("hidden");
     elements.editorForm.classList.add("hidden");
     elements.noteTitleInput.value = "";
     elements.blockList.innerHTML = "";
@@ -114,11 +118,48 @@ export function renderEditor() {
   }
 
   elements.emptyEditorMessage.classList.add("hidden");
+  elements.editorModeSwitch.classList.remove("hidden");
+  renderEditorModeSwitch();
+  if (state.editorMode === "edit") {
+    renderEditMode(note);
+  } else {
+    renderPreviewMode(note);
+  }
+  setSaveStatus("保存済み");
+  state.isLoadingEditor = false;
+}
+
+export function renderEditorModeSwitch() {
+  const isPreview = state.editorMode === "preview";
+  elements.previewModeButton.classList.toggle("active-mode", isPreview);
+  elements.editModeButton.classList.toggle("active-mode", !isPreview);
+}
+
+export function renderEditMode(note) {
+  elements.previewArea.classList.add("hidden");
   elements.editorForm.classList.remove("hidden");
   elements.noteTitleInput.value = note.title;
   renderBlockList(note);
-  setSaveStatus("保存済み");
-  state.isLoadingEditor = false;
+}
+
+export function renderPreviewMode(note) {
+  elements.editorForm.classList.add("hidden");
+  elements.previewArea.classList.remove("hidden");
+  elements.previewArea.innerHTML = "";
+
+  const content = document.createElement("article");
+  content.className = "preview-content";
+
+  const title = document.createElement("h2");
+  title.className = "preview-title";
+  title.textContent = note.title || "無題";
+  content.appendChild(title);
+
+  note.blocks.forEach((block) => {
+    content.appendChild(renderPreviewBlock(block));
+  });
+
+  elements.previewArea.appendChild(content);
 }
 
 export function renderBlockList(note) {

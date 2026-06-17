@@ -66,6 +66,10 @@ function collectElements() {
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.emptyEditorMessage = document.getElementById("emptyEditorMessage");
+  elements.editorModeSwitch = document.getElementById("editorModeSwitch");
+  elements.previewModeButton = document.getElementById("previewModeButton");
+  elements.editModeButton = document.getElementById("editModeButton");
+  elements.previewArea = document.getElementById("previewArea");
   elements.editorForm = document.getElementById("editorForm");
   elements.noteTitleInput = document.getElementById("noteTitleInput");
   elements.addTextBlockButton = document.getElementById("addTextBlockButton");
@@ -104,6 +108,14 @@ function registerEventListeners() {
   });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
   elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
+  elements.previewModeButton.addEventListener("click", () => {
+    state.editorMode = "preview";
+    renderEditor();
+  });
+  elements.editModeButton.addEventListener("click", () => {
+    state.editorMode = "edit";
+    renderEditor();
+  });
   elements.addTextBlockButton.addEventListener("click", addTextBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);

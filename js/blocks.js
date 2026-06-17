@@ -1,8 +1,8 @@
 "use strict";
 
 import { deleteAssetIfUnused } from "./assets.js";
-import { renderDrawingBlock, insertDrawingBlockAfter } from "./drawingBlocks.js";
-import { renderImageBlock, insertImageBlockAfter } from "./imageBlocks.js";
+import { renderDrawingBlock, insertDrawingBlockAfter, renderPreviewDrawingBlock } from "./drawingBlocks.js";
+import { renderImageBlock, insertImageBlockAfter, renderPreviewImageBlock } from "./imageBlocks.js";
 import { getSelectedNote, renderBlockList, saveCurrentNote, scheduleAutoSave } from "./notes.js";
 import { elements } from "./state.js";
 import { createEmptyList, createId } from "./utils.js";
@@ -29,6 +29,29 @@ export function renderBlock(block, index, blockCount) {
   }
 
   return createEmptyList(`未対応ブロック: ${block.type}`);
+}
+
+export function renderPreviewBlock(block) {
+  if (block.type === "text") {
+    return renderPreviewTextBlock(block);
+  }
+
+  if (block.type === "image") {
+    return renderPreviewImageBlock(block);
+  }
+
+  if (block.type === "drawing") {
+    return renderPreviewDrawingBlock(block);
+  }
+
+  return createEmptyList(`未対応ブロック: ${block.type}`);
+}
+
+export function renderPreviewTextBlock(block) {
+  const text = document.createElement("div");
+  text.className = "preview-text";
+  text.textContent = block.text || "";
+  return text;
 }
 
 export function renderTextBlock(block, index, blockCount) {

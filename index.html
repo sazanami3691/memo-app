@@ -56,6 +56,13 @@
         フォルダを選んでメモを作成、またはメモを選択してください。
       </div>
 
+      <div id="editorModeSwitch" class="editor-mode-switch hidden">
+        <button id="previewModeButton" class="mode-button" type="button">閲覧</button>
+        <button id="editModeButton" class="mode-button" type="button">編集</button>
+      </div>
+
+      <div id="previewArea" class="preview-area hidden"></div>
+
       <form id="editorForm" class="editor-form hidden">
         <label class="field-label" for="noteTitleInput">タイトル</label>
         <input id="noteTitleInput" class="title-input" type="text" autocomplete="off" placeholder="メモタイトル">

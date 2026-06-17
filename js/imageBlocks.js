@@ -147,6 +147,39 @@ export function renderImageBlock(block, index, blockCount) {
   return wrapper;
 }
 
+export function renderPreviewImageBlock(block) {
+  const asset = getAssetById(block.assetId);
+  if (!asset) {
+    return createPreviewMissingAsset("画像データが見つかりません");
+  }
+
+  const wrapper = document.createElement("figure");
+  wrapper.className = "preview-image-wrap";
+
+  const image = document.createElement("img");
+  image.className = "preview-image";
+  image.src = asset.dataUrl;
+  image.alt = block.caption || asset.fileName || "画像";
+  image.addEventListener("click", () => openImageModal(asset.dataUrl));
+  wrapper.appendChild(image);
+
+  if (block.caption) {
+    const caption = document.createElement("figcaption");
+    caption.className = "preview-caption";
+    caption.textContent = block.caption;
+    wrapper.appendChild(caption);
+  }
+
+  return wrapper;
+}
+
+function createPreviewMissingAsset(messageText) {
+  const message = document.createElement("div");
+  message.className = "preview-missing-asset";
+  message.textContent = messageText;
+  return message;
+}
+
 export function openImageModal(dataUrl) {
   elements.imageModalImage.src = dataUrl;
   elements.imageModal.classList.remove("hidden");

@@ -30,6 +30,7 @@ export const state = {
   assets: [],
   selectedFolderId: null,
   selectedNoteId: null,
+  editorMode: "preview",
   autoSaveTimer: null,
   isLoadingEditor: false,
   pendingImageInsertAfterBlockId: null,
