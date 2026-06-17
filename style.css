@@ -137,6 +137,51 @@ button:disabled {
   margin-bottom: 14px;
 }
 
+.control-panel-toggle {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.control-panel {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.control-panel.collapsed {
+  display: none;
+}
+
+.control-group {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  padding: 10px;
+}
+
+.control-group h3 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.button-row,
+.button-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-stack {
+  flex-direction: column;
+}
+
+.control-group button {
+  min-height: 44px;
+}
+
 .folder-list,
 .note-list,
 .block-list {

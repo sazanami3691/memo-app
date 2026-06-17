@@ -14,18 +14,36 @@
           <p class="eyebrow">Folders</p>
           <h1>フォルダ</h1>
         </div>
-        <button id="addParentFolderButton" class="primary-button" type="button">親フォルダ作成</button>
       </header>
 
-      <div class="folder-actions">
-        <button id="addChildFolderButton" type="button">子フォルダ作成</button>
-        <button id="renameFolderButton" type="button">名前変更</button>
-        <button id="deleteFolderButton" class="danger-button" type="button">削除</button>
-      </div>
+      <button id="controlPanelToggle" class="control-panel-toggle" type="button">操作メニューを開く</button>
 
-      <div class="backup-actions">
-        <button id="exportBackupButton" type="button">バックアップ書き出し</button>
-        <button id="importBackupButton" type="button">バックアップ読み込み</button>
+      <div id="controlPanel" class="control-panel collapsed">
+        <section class="control-group">
+          <h3>フォルダ操作</h3>
+          <div class="button-stack">
+            <button id="addParentFolderButton" class="primary-button" type="button">親フォルダ作成</button>
+            <button id="addChildFolderButton" type="button">子フォルダ作成</button>
+            <button id="renameFolderButton" type="button">名前変更</button>
+            <button id="deleteFolderButton" class="danger-button" type="button">削除</button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>メモ操作</h3>
+          <div class="button-stack">
+            <button id="addNoteButton" class="primary-button" type="button">新規メモ</button>
+            <button id="deleteSelectedNoteButton" class="danger-button" type="button">選択中メモを削除</button>
+          </div>
+        </section>
+
+        <section class="control-group">
+          <h3>バックアップ</h3>
+          <div class="button-stack">
+            <button id="exportBackupButton" type="button">バックアップ書き出し</button>
+            <button id="importBackupButton" type="button">バックアップ読み込み</button>
+          </div>
+        </section>
       </div>
 
       <nav id="folderList" class="folder-list" aria-live="polite"></nav>
@@ -37,7 +55,6 @@
           <p class="eyebrow">Notes</p>
           <h2 id="selectedFolderName">未選択</h2>
         </div>
-        <button id="addNoteButton" class="primary-button" type="button">新規メモ</button>
       </header>
 
       <div id="noteList" class="note-list" aria-live="polite"></div>

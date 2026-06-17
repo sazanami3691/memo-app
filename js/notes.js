@@ -54,6 +54,11 @@ export async function deleteNoteById(noteId) {
   updateActionButtons();
 }
 
+export async function deleteSelectedNote() {
+  if (!state.selectedNoteId) return;
+  await deleteNoteById(state.selectedNoteId);
+}
+
 export function renderNoteList() {
   elements.noteList.innerHTML = "";
 
@@ -89,14 +94,8 @@ export function renderNoteList() {
     date.className = "note-date";
     date.textContent = formatDate(note.updatedAt);
 
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "note-delete-button";
-    deleteButton.textContent = "削除";
-    deleteButton.addEventListener("click", () => deleteNoteById(note.id));
-
     selectButton.append(title, date);
-    noteItem.append(selectButton, deleteButton);
+    noteItem.append(selectButton);
     elements.noteList.appendChild(noteItem);
   });
 }
@@ -234,6 +233,7 @@ export function updateActionButtons() {
   elements.renameFolderButton.disabled = !hasFolder;
   elements.deleteFolderButton.disabled = !hasFolder;
   elements.addNoteButton.disabled = !hasFolder;
+  elements.deleteSelectedNoteButton.disabled = !hasNote;
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;

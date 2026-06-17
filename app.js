@@ -32,17 +32,25 @@ import {
 } from "./js/imageBlocks.js";
 import {
   createNoteInSelectedFolder,
+  deleteSelectedNote,
   renderEditor,
   renderNoteList,
   scheduleAutoSave,
   updateActionButtons
 } from "./js/notes.js";
-import { DRAWING_SIZES, elements, setRenderAllAction, state } from "./js/state.js";
+import {
+  CONTROL_PANEL_STORAGE_KEY,
+  DRAWING_SIZES,
+  elements,
+  setRenderAllAction,
+  state
+} from "./js/state.js";
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
 async function initializeApp() {
   collectElements();
+  initializeControlPanelState();
   registerEventListeners();
   setRenderAllAction(renderAll);
 
@@ -57,6 +65,8 @@ function collectElements() {
   elements.folderList = document.getElementById("folderList");
   elements.noteList = document.getElementById("noteList");
   elements.selectedFolderName = document.getElementById("selectedFolderName");
+  elements.controlPanelToggle = document.getElementById("controlPanelToggle");
+  elements.controlPanel = document.getElementById("controlPanel");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
   elements.addChildFolderButton = document.getElementById("addChildFolderButton");
   elements.renameFolderButton = document.getElementById("renameFolderButton");
@@ -65,6 +75,7 @@ function collectElements() {
   elements.importBackupButton = document.getElementById("importBackupButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
+  elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
   elements.emptyEditorMessage = document.getElementById("emptyEditorMessage");
   elements.editorModeSwitch = document.getElementById("editorModeSwitch");
   elements.previewModeButton = document.getElementById("previewModeButton");
@@ -97,6 +108,7 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
   elements.addParentFolderButton.addEventListener("click", createParentFolder);
   elements.addChildFolderButton.addEventListener("click", createChildFolder);
   elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
@@ -108,6 +120,7 @@ function registerEventListeners() {
   });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
   elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
+  elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -151,6 +164,30 @@ function registerEventListeners() {
     scheduleAutoSave();
     renderNoteList();
   });
+}
+
+function initializeControlPanelState() {
+  const saved = localStorage.getItem(CONTROL_PANEL_STORAGE_KEY);
+  state.controlPanelOpen = saved === "true";
+  renderControlPanelState();
+}
+
+function toggleControlPanel() {
+  setControlPanelOpen(!state.controlPanelOpen);
+}
+
+function setControlPanelOpen(isOpen) {
+  state.controlPanelOpen = isOpen;
+  localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, isOpen ? "true" : "false");
+  renderControlPanelState();
+}
+
+function renderControlPanelState() {
+  elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
+  elements.controlPanelToggle.textContent = state.controlPanelOpen
+    ? "操作メニューを閉じる"
+    : "操作メニューを開く";
+  elements.controlPanelToggle.setAttribute("aria-expanded", state.controlPanelOpen ? "true" : "false");
 }
 
 function renderAll() {
