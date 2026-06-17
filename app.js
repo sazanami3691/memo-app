@@ -21,6 +21,7 @@ import {
   createParentFolder,
   deleteSelectedFolder,
   ensureInitialFolder,
+  goBackFromNotes,
   renameSelectedFolder,
   renderFolderList,
   selectInitialFolder
@@ -62,9 +63,14 @@ async function initializeApp() {
 }
 
 function collectElements() {
+  elements.folderPanel = document.querySelector(".folder-column");
+  elements.noteListPanel = document.querySelector(".note-list-column");
+  elements.editorPanel = document.querySelector(".editor-column");
   elements.folderList = document.getElementById("folderList");
   elements.noteList = document.getElementById("noteList");
   elements.selectedFolderName = document.getElementById("selectedFolderName");
+  elements.noteListBackButton = document.getElementById("noteListBackButton");
+  elements.editorBackButton = document.getElementById("editorBackButton");
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
@@ -121,6 +127,13 @@ function registerEventListeners() {
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
   elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
   elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
+  elements.noteListBackButton.addEventListener("click", () => {
+    goBackFromNotes();
+  });
+  elements.editorBackButton.addEventListener("click", () => {
+    state.appView = "notes";
+    renderAll();
+  });
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -195,4 +208,11 @@ function renderAll() {
   renderNoteList();
   renderEditor();
   updateActionButtons();
+  renderAppView();
+}
+
+function renderAppView() {
+  elements.folderPanel.classList.toggle("hidden-screen", state.appView !== "folders");
+  elements.noteListPanel.classList.toggle("hidden-screen", state.appView !== "notes");
+  elements.editorPanel.classList.toggle("hidden-screen", state.appView !== "editor");
 }

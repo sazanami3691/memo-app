@@ -8,14 +8,7 @@
 </head>
 <body>
   <div class="app-shell">
-    <aside class="column folder-column" aria-label="フォルダ一覧">
-      <header class="column-header">
-        <div>
-          <p class="eyebrow">Folders</p>
-          <h1>フォルダ</h1>
-        </div>
-      </header>
-
+    <div class="app-controls" aria-label="操作メニュー">
       <button id="controlPanelToggle" class="control-panel-toggle" type="button">操作メニューを開く</button>
 
       <div id="controlPanel" class="control-panel collapsed">
@@ -45,23 +38,34 @@
           </div>
         </section>
       </div>
+    </div>
+
+    <aside class="column folder-column screen-panel" aria-label="フォルダ一覧">
+      <header class="column-header">
+        <div>
+          <p class="eyebrow">Folders</p>
+          <h1>フォルダ</h1>
+        </div>
+      </header>
 
       <nav id="folderList" class="folder-list" aria-live="polite"></nav>
     </aside>
 
-    <main class="column note-list-column" aria-label="メモ一覧">
+    <main class="column note-list-column screen-panel hidden-screen" aria-label="メモ一覧">
       <header class="column-header">
         <div>
           <p class="eyebrow">Notes</p>
           <h2 id="selectedFolderName">未選択</h2>
         </div>
+        <button id="noteListBackButton" class="nav-back-button" type="button">戻る</button>
       </header>
 
       <div id="noteList" class="note-list" aria-live="polite"></div>
     </main>
 
-    <section class="column editor-column" aria-label="メモ編集">
+    <section class="column editor-column screen-panel hidden-screen" aria-label="メモ編集">
       <header class="editor-header">
+        <button id="editorBackButton" class="nav-back-button" type="button">メモ一覧へ戻る</button>
         <div>
           <p class="eyebrow">Editor</p>
           <h2>編集</h2>

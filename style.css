@@ -68,11 +68,15 @@ button:disabled {
 }
 
 .app-shell {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.8fr) minmax(280px, 1fr) minmax(440px, 1.55fr);
-  gap: 14px;
+  display: block;
+  width: min(1180px, 100%);
   min-height: 100vh;
+  margin: 0 auto;
   padding: 14px;
+}
+
+.app-controls {
+  margin-bottom: 10px;
 }
 
 .column {
@@ -83,6 +87,15 @@ button:disabled {
   box-shadow: var(--shadow);
   padding: 16px;
   overflow: auto;
+}
+
+.screen-panel {
+  width: 100%;
+  min-height: calc(100vh - 92px);
+}
+
+.hidden-screen {
+  display: none !important;
 }
 
 .column-header,
@@ -714,7 +727,8 @@ button:disabled {
 
 @media (max-width: 980px) {
   .app-shell {
-    grid-template-columns: 1fr;
+    width: 100%;
+    padding: 10px;
   }
 
   .column {
