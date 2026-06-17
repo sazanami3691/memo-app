@@ -1,0 +1,6 @@
+memo_backup_*.json
+backup*.json
+*.backup.json
+*.bak
+.DS_Store
+Thumbs.db
