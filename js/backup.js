@@ -13,13 +13,14 @@ import {
 import { closeDrawingModal } from "./drawingBlocks.js";
 import { closeImageModal } from "./imageBlocks.js";
 import { ensureInitialFolder, selectInitialFolder } from "./folders.js";
-import { renderEditor, renderNoteList, setSaveStatus, updateActionButtons } from "./notes.js";
+import { setSaveStatus } from "./notes.js";
 import {
   BACKUP_APP_NAME,
   BACKUP_VERSION,
   STORE_ASSETS,
   STORE_FOLDERS,
   STORE_NOTES,
+  appActions,
   elements,
   state
 } from "./state.js";
@@ -71,9 +72,7 @@ export async function handleBackupFileSelected() {
     await ensureInitialFolder();
     selectInitialFolder();
     state.selectedNoteId = null;
-    renderNoteList();
-    renderEditor();
-    updateActionButtons();
+    appActions.renderAll();
     setSaveStatus("保存済み");
 
     alert("バックアップを復元しました。");

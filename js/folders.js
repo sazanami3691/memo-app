@@ -25,6 +25,7 @@ export async function ensureInitialFolder() {
 }
 
 export function selectInitialFolder() {
+  state.appView = "folders";
   state.folderNavLevel = "parents";
   state.activeParentFolderId = null;
   state.activeChildFolderId = null;
@@ -40,6 +41,7 @@ export async function createParentFolder() {
   const folder = createFolderObject(cleanName, null);
   await saveFolder(folder);
   state.folders.push(folder);
+  state.appView = "folders";
   state.folderNavLevel = "children";
   state.activeParentFolderId = folder.id;
   state.activeChildFolderId = null;
@@ -62,6 +64,7 @@ export async function createChildFolder() {
   const folder = createFolderObject(cleanName, parentFolder.id);
   await saveFolder(folder);
   state.folders.push(folder);
+  state.appView = "folders";
   state.folderNavLevel = "children";
   state.activeParentFolderId = parentFolder.id;
   state.activeChildFolderId = null;
@@ -119,6 +122,7 @@ export async function deleteSelectedFolder() {
   state.folders = state.folders.filter((item) => !targetFolderIds.includes(item.id));
   await deleteUnusedAssets(maybeUnusedAssetIds);
 
+  state.appView = "folders";
   state.folderNavLevel = "parents";
   state.activeParentFolderId = null;
   state.activeChildFolderId = null;
@@ -296,6 +300,7 @@ function createNavEmptyMessage(message) {
 }
 
 function openParentFolder(parentFolderId) {
+  state.appView = "folders";
   state.folderNavLevel = "children";
   state.activeParentFolderId = parentFolderId;
   state.activeChildFolderId = null;
@@ -305,6 +310,7 @@ function openParentFolder(parentFolderId) {
 }
 
 function openParentNotes(parentFolderId) {
+  state.appView = "notes";
   state.folderNavLevel = "notes";
   state.activeParentFolderId = parentFolderId;
   state.activeChildFolderId = null;
@@ -315,6 +321,7 @@ function openParentNotes(parentFolderId) {
 
 function openChildFolder(childFolderId) {
   const child = state.folders.find((folder) => folder.id === childFolderId);
+  state.appView = "notes";
   state.folderNavLevel = "notes";
   state.activeParentFolderId = child ? child.parentId : state.activeParentFolderId;
   state.activeChildFolderId = childFolderId;
@@ -323,7 +330,8 @@ function openChildFolder(childFolderId) {
   appActions.renderAll();
 }
 
-function goToParentFolderList() {
+export function goToParentFolderList() {
+  state.appView = "folders";
   state.folderNavLevel = "parents";
   state.activeParentFolderId = null;
   state.activeChildFolderId = null;
@@ -332,7 +340,8 @@ function goToParentFolderList() {
   appActions.renderAll();
 }
 
-function goBackFromNotes() {
+export function goBackFromNotes() {
+  state.appView = "folders";
   state.folderNavLevel = "children";
   state.activeChildFolderId = null;
   state.selectedFolderId = state.activeParentFolderId;

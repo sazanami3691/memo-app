@@ -31,6 +31,7 @@ export const state = {
   assets: [],
   selectedFolderId: null,
   selectedNoteId: null,
+  appView: "folders",
   editorMode: "preview",
   controlPanelOpen: false,
   folderNavLevel: "parents",

@@ -4,7 +4,7 @@ import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
 import { createTextBlock, renderBlock, renderPreviewBlock } from "./blocks.js";
 import { deleteNote, saveNote } from "./db.js";
 import { getSelectedFolder } from "./folders.js";
-import { AUTO_SAVE_DELAY, elements, state } from "./state.js";
+import { AUTO_SAVE_DELAY, appActions, elements, state } from "./state.js";
 import { createEmptyList, createId, formatDate } from "./utils.js";
 
 export function createNoteObject(folderId) {
@@ -26,10 +26,9 @@ export async function createNoteInSelectedFolder() {
   await saveNote(note);
   state.notes.push(note);
   state.selectedNoteId = note.id;
+  state.appView = "editor";
   state.editorMode = "edit";
-  renderNoteList();
-  renderEditor();
-  updateActionButtons();
+  appActions.renderAll();
   elements.noteTitleInput.focus();
   elements.noteTitleInput.select();
 }
@@ -47,11 +46,10 @@ export async function deleteNoteById(noteId) {
 
   if (state.selectedNoteId === noteId) {
     state.selectedNoteId = null;
+    state.appView = "notes";
   }
 
-  renderNoteList();
-  renderEditor();
-  updateActionButtons();
+  appActions.renderAll();
 }
 
 export async function deleteSelectedNote() {
@@ -86,10 +84,9 @@ export function renderNoteList() {
     selectButton.className = "note-item";
     selectButton.addEventListener("click", () => {
       state.selectedNoteId = note.id;
+      state.appView = "editor";
       state.editorMode = "preview";
-      renderNoteList();
-      renderEditor();
-      updateActionButtons();
+      appActions.renderAll();
     });
 
     const title = document.createElement("span");
