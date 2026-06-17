@@ -226,7 +226,7 @@ function renderScreenHeader() {
 
 function handleScreenBack() {
   if (state.appView === "editor") {
-    state.appView = "notes";
+    state.appView = isParentFolderContentContext() ? "folders" : "notes";
     renderAll();
     return;
   }
@@ -262,7 +262,9 @@ function getScreenTitle() {
 
 function getScreenBackLabel() {
   if (state.appView === "editor") {
-    return "＜ メモ一覧へ戻る";
+    return isParentFolderContentContext()
+      ? "＜ 親フォルダへ戻る"
+      : "＜ メモ一覧へ戻る";
   }
 
   if (state.appView === "notes" || state.folderNavLevel === "notes") {
@@ -274,4 +276,13 @@ function getScreenBackLabel() {
   }
 
   return "";
+}
+
+function isParentFolderContentContext() {
+  const folder = state.folders.find((item) => item.id === state.selectedFolderId);
+  return Boolean(
+    folder &&
+    !folder.parentId &&
+    state.folderNavLevel === "children"
+  );
 }

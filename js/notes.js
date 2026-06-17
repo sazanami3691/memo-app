@@ -20,7 +20,8 @@ export function createNoteObject(folderId) {
 }
 
 export async function createNoteInSelectedFolder() {
-  if (!state.selectedFolderId || state.folderNavLevel !== "notes") return;
+  const selectedFolder = getSelectedFolder();
+  if (!selectedFolder || !canCreateNoteInCurrentView(selectedFolder)) return;
 
   const note = createNoteObject(state.selectedFolderId);
   await saveNote(note);
@@ -36,6 +37,12 @@ export async function createNoteInSelectedFolder() {
 export async function deleteNoteById(noteId) {
   const note = state.notes.find((item) => item.id === noteId);
   if (!note) return;
+  const folder = state.folders.find((item) => item.id === note.folderId);
+  const returnToParentContents = Boolean(
+    folder &&
+    !folder.parentId &&
+    state.folderNavLevel === "children"
+  );
 
   if (!confirm(`「${note.title || "無題"}」を削除します。よろしいですか？`)) return;
 
@@ -46,7 +53,7 @@ export async function deleteNoteById(noteId) {
 
   if (state.selectedNoteId === noteId) {
     state.selectedNoteId = null;
-    state.appView = "notes";
+    state.appView = returnToParentContents ? "folders" : "notes";
   }
 
   appActions.renderAll();
@@ -89,6 +96,14 @@ export function renderNoteList() {
       appActions.renderAll();
     });
 
+    const icon = document.createElement("span");
+    icon.className = "note-item-icon";
+    icon.textContent = "📝";
+    icon.setAttribute("aria-hidden", "true");
+
+    const body = document.createElement("span");
+    body.className = "note-item-body";
+
     const title = document.createElement("span");
     title.className = "note-title";
     title.textContent = note.title || "無題";
@@ -97,7 +112,8 @@ export function renderNoteList() {
     date.className = "note-date";
     date.textContent = formatDate(note.updatedAt);
 
-    selectButton.append(title, date);
+    body.append(title, date);
+    selectButton.append(icon, body);
     noteItem.append(selectButton);
     elements.noteList.appendChild(noteItem);
   });
@@ -231,7 +247,7 @@ export function updateActionButtons() {
   const hasFolder = Boolean(selectedFolder);
   const canAddChild = Boolean(state.activeParentFolderId);
   const hasNote = Boolean(getSelectedNote());
-  const canCreateNote = hasFolder && state.folderNavLevel === "notes";
+  const canCreateNote = hasFolder && canCreateNoteInCurrentView(selectedFolder);
 
   elements.addChildFolderButton.disabled = !canAddChild;
   elements.renameFolderButton.disabled = !hasFolder;
@@ -241,4 +257,17 @@ export function updateActionButtons() {
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
+}
+
+function canCreateNoteInCurrentView(selectedFolder) {
+  if (state.folderNavLevel === "notes") {
+    return true;
+  }
+
+  return Boolean(
+    state.appView === "folders" &&
+    state.folderNavLevel === "children" &&
+    !selectedFolder.parentId &&
+    selectedFolder.id === state.activeParentFolderId
+  );
 }

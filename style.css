@@ -344,8 +344,17 @@ button:disabled {
 
 .nav-list-item-body {
   display: grid;
+  flex: 1;
   gap: 2px;
   min-width: 0;
+}
+
+.nav-list-item-icon {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  font-size: 1.15rem;
+  line-height: 1;
+  text-align: center;
 }
 
 .nav-list-item-title {
@@ -362,6 +371,10 @@ button:disabled {
   flex: 0 0 auto;
   color: var(--muted);
   font-weight: 700;
+}
+
+.nav-note-item {
+  background: #fbfdfd;
 }
 
 .nav-empty-message,
@@ -388,6 +401,8 @@ button:disabled {
 
 .note-item {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
   gap: 6px;
   width: 100%;
   min-height: 58px;
@@ -395,6 +410,17 @@ button:disabled {
   background: transparent;
   color: var(--text);
   text-align: left;
+}
+
+.note-item-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.note-item-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
 }
 
 .note-title {

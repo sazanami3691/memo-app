@@ -3,7 +3,7 @@
 import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
 import { deleteFolder, deleteNote, saveFolder } from "./db.js";
 import { appActions, elements, state } from "./state.js";
-import { createEmptyList, createId, normalizeName } from "./utils.js";
+import { createEmptyList, createId, formatDate, normalizeName } from "./utils.js";
 
 export function createFolderObject(name, parentId) {
   const now = Date.now();
@@ -184,15 +184,19 @@ function renderChildFolderScreen() {
 
   const list = document.createElement("div");
   list.className = "nav-list";
-  list.appendChild(createParentNotesButton(parent));
 
   const children = getSortedFolders().filter((folder) => folder.parentId === parent.id);
-  if (children.length === 0) {
-    list.appendChild(createNavEmptyMessage("子フォルダがありません。"));
-  } else {
-    children.forEach((child) => {
-      list.appendChild(createChildFolderButton(child));
-    });
+  children.forEach((child) => {
+    list.appendChild(createChildFolderButton(child));
+  });
+
+  const notes = getNotesInFolder(parent.id);
+  notes.forEach((note) => {
+    list.appendChild(createParentNoteButton(note, parent.id));
+  });
+
+  if (children.length === 0 && notes.length === 0) {
+    list.appendChild(createNavEmptyMessage("このフォルダにはまだ項目がありません。"));
   }
 
   elements.folderList.appendChild(list);
@@ -217,6 +221,7 @@ function createParentFolderButton(parent) {
   const childCount = state.folders.filter((folder) => folder.parentId === parent.id).length;
   const noteCount = countNotesInFolder(parent.id);
   return createNavListItem({
+    icon: "📁",
     title: parent.name,
     meta: `子フォルダ ${childCount} / メモ ${noteCount}`,
     actionText: "＞",
@@ -224,17 +229,19 @@ function createParentFolderButton(parent) {
   });
 }
 
-function createParentNotesButton(parent) {
+function createParentNoteButton(note, parentFolderId) {
   return createNavListItem({
-    title: "このフォルダのメモを見る",
-    meta: `${countNotesInFolder(parent.id)}件`,
-    actionText: "＞",
-    onClick: () => openParentNotes(parent.id)
+    icon: "📝",
+    title: note.title || "無題",
+    meta: `更新: ${formatDate(note.updatedAt)}`,
+    itemClass: "nav-note-item",
+    onClick: () => openParentNote(note.id, parentFolderId)
   });
 }
 
 function createChildFolderButton(child) {
   return createNavListItem({
+    icon: "📁",
     title: child.name,
     meta: `メモ ${countNotesInFolder(child.id)}`,
     actionText: "＞",
@@ -242,11 +249,19 @@ function createChildFolderButton(child) {
   });
 }
 
-function createNavListItem({ title, meta, actionText, onClick }) {
+function createNavListItem({ icon, title, meta, actionText, itemClass, onClick }) {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = "nav-list-item";
+  button.className = `nav-list-item${itemClass ? ` ${itemClass}` : ""}`;
   button.addEventListener("click", onClick);
+
+  if (icon) {
+    const iconElement = document.createElement("span");
+    iconElement.className = "nav-list-item-icon";
+    iconElement.textContent = icon;
+    iconElement.setAttribute("aria-hidden", "true");
+    button.appendChild(iconElement);
+  }
 
   const body = document.createElement("span");
   body.className = "nav-list-item-body";
@@ -263,11 +278,14 @@ function createNavListItem({ title, meta, actionText, onClick }) {
     body.appendChild(metaElement);
   }
 
-  const action = document.createElement("span");
-  action.className = "nav-list-item-action";
-  action.textContent = actionText;
+  button.appendChild(body);
 
-  button.append(body, action);
+  if (actionText) {
+    const action = document.createElement("span");
+    action.className = "nav-list-item-action";
+    action.textContent = actionText;
+    button.appendChild(action);
+  }
   return button;
 }
 
@@ -308,13 +326,14 @@ function openParentFolder(parentFolderId) {
   appActions.renderAll();
 }
 
-function openParentNotes(parentFolderId) {
-  state.appView = "notes";
-  state.folderNavLevel = "notes";
+function openParentNote(noteId, parentFolderId) {
+  state.appView = "editor";
+  state.folderNavLevel = "children";
   state.activeParentFolderId = parentFolderId;
   state.activeChildFolderId = null;
   state.selectedFolderId = parentFolderId;
-  state.selectedNoteId = null;
+  state.selectedNoteId = noteId;
+  state.editorMode = "preview";
   appActions.renderAll();
 }
 
@@ -354,6 +373,12 @@ function getActiveParentFolder() {
 
 function countNotesInFolder(folderId) {
   return state.notes.filter((note) => note.folderId === folderId).length;
+}
+
+function getNotesInFolder(folderId) {
+  return state.notes
+    .filter((note) => note.folderId === folderId)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
 export function getSelectedFolder() {
