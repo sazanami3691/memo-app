@@ -33,13 +33,24 @@ import {
   handleImageFileSelected
 } from "./js/imageBlocks.js";
 import {
+  closeMoveNoteModal,
+  openMoveNoteModal
+} from "./js/moveNotes.js";
+import {
   createNoteInSelectedFolder,
   deleteSelectedNote,
   renderEditor,
   renderNoteList,
   scheduleAutoSave,
+  toggleSelectedNotePin,
   updateActionButtons
 } from "./js/notes.js";
+import {
+  closeSearchView,
+  handleSearchInput,
+  openSearchView,
+  renderSearchView
+} from "./js/search.js";
 import {
   CONTROL_PANEL_STORAGE_KEY,
   DRAWING_SIZES,
@@ -66,6 +77,7 @@ async function initializeApp() {
 function collectElements() {
   elements.folderPanel = document.querySelector(".folder-column");
   elements.noteListPanel = document.querySelector(".note-list-column");
+  elements.searchPanel = document.querySelector(".search-column");
   elements.editorPanel = document.querySelector(".editor-column");
   elements.folderList = document.getElementById("folderList");
   elements.noteList = document.getElementById("noteList");
@@ -74,6 +86,9 @@ function collectElements() {
   elements.screenHeaderTitle = document.getElementById("screenHeaderTitle");
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
+  elements.openSearchButton = document.getElementById("openSearchButton");
+  elements.searchInput = document.getElementById("searchInput");
+  elements.searchResults = document.getElementById("searchResults");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
   elements.addChildFolderButton = document.getElementById("addChildFolderButton");
   elements.renameFolderButton = document.getElementById("renameFolderButton");
@@ -85,6 +100,9 @@ function collectElements() {
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
   elements.emptyEditorMessage = document.getElementById("emptyEditorMessage");
   elements.editorModeSwitch = document.getElementById("editorModeSwitch");
+  elements.noteActions = document.getElementById("noteActions");
+  elements.togglePinButton = document.getElementById("togglePinButton");
+  elements.moveNoteButton = document.getElementById("moveNoteButton");
   elements.previewModeButton = document.getElementById("previewModeButton");
   elements.editModeButton = document.getElementById("editModeButton");
   elements.previewArea = document.getElementById("previewArea");
@@ -112,10 +130,19 @@ function collectElements() {
   elements.drawingCanvas = document.getElementById("drawingCanvas");
   elements.drawingSaveButton = document.getElementById("drawingSaveButton");
   elements.drawingCancelButton = document.getElementById("drawingCancelButton");
+  elements.moveNoteModal = document.getElementById("moveNoteModal");
+  elements.moveNoteModalCloseButton = document.getElementById("moveNoteModalCloseButton");
+  elements.moveNoteFolderList = document.getElementById("moveNoteFolderList");
+  elements.moveNoteCancelButton = document.getElementById("moveNoteCancelButton");
 }
 
 function registerEventListeners() {
   elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
+  elements.openSearchButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    openSearchView();
+  });
+  elements.searchInput.addEventListener("input", handleSearchInput);
   elements.addParentFolderButton.addEventListener("click", createParentFolder);
   elements.addChildFolderButton.addEventListener("click", createChildFolder);
   elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
@@ -129,6 +156,8 @@ function registerEventListeners() {
   elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
   elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
   elements.screenBackButton.addEventListener("click", handleScreenBack);
+  elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
+  elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -163,6 +192,13 @@ function registerEventListeners() {
   elements.drawingCanvas.addEventListener("pointerup", endDrawing);
   elements.drawingCanvas.addEventListener("pointercancel", endDrawing);
   elements.drawingCanvas.addEventListener("pointerleave", endDrawing);
+  elements.moveNoteModalCloseButton.addEventListener("click", closeMoveNoteModal);
+  elements.moveNoteCancelButton.addEventListener("click", closeMoveNoteModal);
+  elements.moveNoteModal.addEventListener("click", (event) => {
+    if (event.target === elements.moveNoteModal) {
+      closeMoveNoteModal();
+    }
+  });
 
   elements.noteTitleInput.addEventListener("input", () => {
     if (state.isLoadingEditor) return;
@@ -203,6 +239,7 @@ function renderControlPanelState() {
 function renderAll() {
   renderFolderList();
   renderNoteList();
+  renderSearchView();
   renderEditor();
   updateActionButtons();
   renderAppView();
@@ -212,6 +249,7 @@ function renderAll() {
 function renderAppView() {
   elements.folderPanel.classList.toggle("hidden-screen", state.appView !== "folders");
   elements.noteListPanel.classList.toggle("hidden-screen", state.appView !== "notes");
+  elements.searchPanel.classList.toggle("hidden-screen", state.appView !== "search");
   elements.editorPanel.classList.toggle("hidden-screen", state.appView !== "editor");
 }
 
@@ -225,7 +263,19 @@ function renderScreenHeader() {
 }
 
 function handleScreenBack() {
+  if (state.appView === "search") {
+    closeSearchView();
+    return;
+  }
+
   if (state.appView === "editor") {
+    if (state.editorReturnView === "search") {
+      state.appView = "search";
+      state.editorReturnView = null;
+      renderAll();
+      return;
+    }
+
     state.appView = isParentFolderContentContext() ? "folders" : "notes";
     renderAll();
     return;
@@ -242,6 +292,10 @@ function handleScreenBack() {
 }
 
 function getScreenTitle() {
+  if (state.appView === "search") {
+    return "検索";
+  }
+
   if (state.appView === "editor") {
     const note = state.notes.find((item) => item.id === state.selectedNoteId);
     return note ? (note.title || "無題") : "メモ";
@@ -261,7 +315,15 @@ function getScreenTitle() {
 }
 
 function getScreenBackLabel() {
+  if (state.appView === "search") {
+    return "＜ 戻る";
+  }
+
   if (state.appView === "editor") {
+    if (state.editorReturnView === "search") {
+      return "＜ 検索結果へ戻る";
+    }
+
     return isParentFolderContentContext()
       ? "＜ 親フォルダへ戻る"
       : "＜ メモ一覧へ戻る";

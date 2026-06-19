@@ -351,10 +351,11 @@ button:disabled {
 
 .nav-list-item-icon {
   flex: 0 0 auto;
-  width: 1.5rem;
+  min-width: 1.5rem;
   font-size: 1.15rem;
   line-height: 1;
   text-align: center;
+  white-space: nowrap;
 }
 
 .nav-list-item-title {
@@ -415,6 +416,7 @@ button:disabled {
 .note-item-icon {
   font-size: 1.15rem;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .note-item-body {
@@ -490,6 +492,82 @@ button:disabled {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.note-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.note-actions button {
+  min-height: 44px;
+}
+
+.search-field-wrap {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(47, 127, 116, 0.18);
+}
+
+.search-results {
+  display: grid;
+  gap: 8px;
+}
+
+.search-result-section-title {
+  margin: 12px 0 2px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.search-result-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 58px;
+  text-align: left;
+}
+
+.search-result-icon {
+  white-space: nowrap;
+  font-size: 1.08rem;
+}
+
+.search-result-body {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.search-result-title {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.search-result-meta {
+  color: var(--muted);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.search-result-action {
+  color: var(--muted);
   font-weight: 700;
 }
 
@@ -734,6 +812,81 @@ button:disabled {
 
 .drawing-modal.hidden {
   display: none;
+}
+
+.move-note-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 20, 22, 0.72);
+  padding: 14px;
+}
+
+.move-note-modal.hidden {
+  display: none;
+}
+
+.move-note-modal-content {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  width: min(560px, 96vw);
+  max-height: 90vh;
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.move-note-modal-header,
+.move-note-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.move-note-modal-header h2 {
+  margin: 0;
+  font-size: 1.18rem;
+}
+
+.move-note-folder-list {
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+}
+
+.move-note-destination {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  text-align: left;
+}
+
+.move-note-destination.child-destination {
+  width: calc(100% - 22px);
+  margin-left: 22px;
+}
+
+.move-note-destination-icon {
+  line-height: 1;
+}
+
+.move-note-destination-name {
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.move-note-current-label {
+  color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .drawing-modal-content {

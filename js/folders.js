@@ -31,6 +31,9 @@ export function selectInitialFolder() {
   state.activeChildFolderId = null;
   state.selectedFolderId = null;
   state.selectedNoteId = null;
+  state.searchQuery = "";
+  state.searchReturnState = null;
+  state.editorReturnView = null;
 }
 
 export async function createParentFolder() {
@@ -47,6 +50,7 @@ export async function createParentFolder() {
   state.activeChildFolderId = null;
   state.selectedFolderId = folder.id;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -70,6 +74,7 @@ export async function createChildFolder() {
   state.activeChildFolderId = null;
   state.selectedFolderId = parentFolder.id;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -231,7 +236,7 @@ function createParentFolderButton(parent) {
 
 function createParentNoteButton(note, parentFolderId) {
   return createNavListItem({
-    icon: "📝",
+    icon: note.isPinned === true ? "📌 📝" : "📝",
     title: note.title || "無題",
     meta: `更新: ${formatDate(note.updatedAt)}`,
     itemClass: "nav-note-item",
@@ -323,6 +328,7 @@ function openParentFolder(parentFolderId) {
   state.activeChildFolderId = null;
   state.selectedFolderId = parentFolderId;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -333,6 +339,7 @@ function openParentNote(noteId, parentFolderId) {
   state.activeChildFolderId = null;
   state.selectedFolderId = parentFolderId;
   state.selectedNoteId = noteId;
+  state.editorReturnView = null;
   state.editorMode = "preview";
   appActions.renderAll();
 }
@@ -345,6 +352,7 @@ function openChildFolder(childFolderId) {
   state.activeChildFolderId = childFolderId;
   state.selectedFolderId = childFolderId;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -355,6 +363,7 @@ export function goToParentFolderList() {
   state.activeChildFolderId = null;
   state.selectedFolderId = null;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -364,6 +373,7 @@ export function goBackFromNotes() {
   state.activeChildFolderId = null;
   state.selectedFolderId = state.activeParentFolderId;
   state.selectedNoteId = null;
+  state.editorReturnView = null;
   appActions.renderAll();
 }
 
@@ -378,7 +388,10 @@ function countNotesInFolder(folderId) {
 function getNotesInFolder(folderId) {
   return state.notes
     .filter((note) => note.folderId === folderId)
-    .sort((a, b) => b.updatedAt - a.updatedAt);
+    .sort((a, b) => {
+      const pinDifference = Number(b.isPinned === true) - Number(a.isPinned === true);
+      return pinDifference || b.updatedAt - a.updatedAt;
+    });
 }
 
 export function getSelectedFolder() {

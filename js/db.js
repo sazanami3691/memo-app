@@ -129,5 +129,6 @@ function normalizeLoadedNotes() {
     if (!Array.isArray(note.blocks)) {
       note.blocks = [];
     }
+    note.isPinned = note.isPinned === true;
   });
 }

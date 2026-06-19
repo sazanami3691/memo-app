@@ -21,6 +21,13 @@
 
       <div id="controlPanel" class="control-panel collapsed">
         <section class="control-group">
+          <h3>ツール</h3>
+          <div class="button-stack">
+            <button id="openSearchButton" type="button">検索</button>
+          </div>
+        </section>
+
+        <section class="control-group">
           <h3>フォルダ操作</h3>
           <div class="button-stack">
             <button id="addParentFolderButton" class="primary-button" type="button">親フォルダ作成</button>
@@ -63,6 +70,14 @@
       <div id="noteList" class="note-list" aria-live="polite"></div>
     </main>
 
+    <section class="column search-column screen-panel hidden-screen" aria-label="検索">
+      <div class="search-field-wrap">
+        <label class="field-label" for="searchInput">メモ・フォルダを検索</label>
+        <input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="タイトル、本文、キャプション、フォルダ名">
+      </div>
+      <div id="searchResults" class="search-results" aria-live="polite"></div>
+    </section>
+
     <section class="column editor-column screen-panel hidden-screen" aria-label="メモ編集">
       <header class="editor-header content-header">
         <div>
@@ -79,6 +94,11 @@
       <div id="editorModeSwitch" class="editor-mode-switch hidden">
         <button id="previewModeButton" class="mode-button" type="button">閲覧</button>
         <button id="editModeButton" class="mode-button" type="button">編集</button>
+      </div>
+
+      <div id="noteActions" class="note-actions hidden">
+        <button id="togglePinButton" type="button">☆ お気に入り</button>
+        <button id="moveNoteButton" type="button">メモを移動</button>
       </div>
 
       <div id="previewArea" class="preview-area hidden"></div>
@@ -136,6 +156,19 @@
       <footer class="drawing-modal-footer">
         <button id="drawingSaveButton" class="primary-button" type="button">保存</button>
         <button id="drawingCancelButton" type="button">キャンセル</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="moveNoteModal" class="move-note-modal hidden" aria-hidden="true">
+    <div class="move-note-modal-content" role="dialog" aria-modal="true" aria-labelledby="moveNoteModalTitle">
+      <header class="move-note-modal-header">
+        <h2 id="moveNoteModalTitle">移動先を選択</h2>
+        <button id="moveNoteModalCloseButton" type="button">閉じる</button>
+      </header>
+      <div id="moveNoteFolderList" class="move-note-folder-list"></div>
+      <footer class="move-note-modal-footer">
+        <button id="moveNoteCancelButton" type="button">キャンセル</button>
       </footer>
     </div>
   </div>

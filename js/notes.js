@@ -14,6 +14,7 @@ export function createNoteObject(folderId) {
     folderId,
     title: "新規メモ",
     blocks: [createTextBlock("")],
+    isPinned: false,
     createdAt: now,
     updatedAt: now
   };
@@ -28,6 +29,7 @@ export async function createNoteInSelectedFolder() {
   state.notes.push(note);
   state.selectedNoteId = note.id;
   state.appView = "editor";
+  state.editorReturnView = null;
   state.editorMode = "edit";
   appActions.renderAll();
   elements.noteTitleInput.focus();
@@ -53,7 +55,12 @@ export async function deleteNoteById(noteId) {
 
   if (state.selectedNoteId === noteId) {
     state.selectedNoteId = null;
-    state.appView = returnToParentContents ? "folders" : "notes";
+    if (state.editorReturnView === "search") {
+      state.appView = "search";
+      state.editorReturnView = null;
+    } else {
+      state.appView = returnToParentContents ? "folders" : "notes";
+    }
   }
 
   appActions.renderAll();
@@ -92,13 +99,14 @@ export function renderNoteList() {
     selectButton.addEventListener("click", () => {
       state.selectedNoteId = note.id;
       state.appView = "editor";
+      state.editorReturnView = null;
       state.editorMode = "preview";
       appActions.renderAll();
     });
 
     const icon = document.createElement("span");
     icon.className = "note-item-icon";
-    icon.textContent = "📝";
+    icon.textContent = note.isPinned === true ? "📌 📝" : "📝";
     icon.setAttribute("aria-hidden", "true");
 
     const body = document.createElement("span");
@@ -126,6 +134,7 @@ export function renderEditor() {
   if (!note) {
     elements.emptyEditorMessage.classList.remove("hidden");
     elements.editorModeSwitch.classList.add("hidden");
+    elements.noteActions.classList.add("hidden");
     elements.previewArea.classList.add("hidden");
     elements.editorForm.classList.add("hidden");
     elements.noteTitleInput.value = "";
@@ -137,6 +146,10 @@ export function renderEditor() {
 
   elements.emptyEditorMessage.classList.add("hidden");
   elements.editorModeSwitch.classList.remove("hidden");
+  elements.noteActions.classList.remove("hidden");
+  elements.togglePinButton.textContent = note.isPinned === true
+    ? "★ お気に入り解除"
+    : "☆ お気に入り";
   renderEditorModeSwitch();
   if (state.editorMode === "edit") {
     renderEditMode(note);
@@ -200,7 +213,17 @@ export function getSelectedNote() {
 export function getNotesInSelectedFolder() {
   return state.notes
     .filter((note) => note.folderId === state.selectedFolderId)
-    .sort((a, b) => b.updatedAt - a.updatedAt);
+    .sort(compareNotes);
+}
+
+export async function toggleSelectedNotePin() {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  note.isPinned = note.isPinned !== true;
+  note.updatedAt = Date.now();
+  await saveNote(note);
+  appActions.renderAll();
 }
 
 export function scheduleAutoSave() {
@@ -254,6 +277,8 @@ export function updateActionButtons() {
   elements.deleteFolderButton.disabled = !hasFolder;
   elements.addNoteButton.disabled = !canCreateNote;
   elements.deleteSelectedNoteButton.disabled = !hasNote;
+  elements.togglePinButton.disabled = !hasNote;
+  elements.moveNoteButton.disabled = !hasNote;
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
@@ -270,4 +295,9 @@ function canCreateNoteInCurrentView(selectedFolder) {
     !selectedFolder.parentId &&
     selectedFolder.id === state.activeParentFolderId
   );
+}
+
+function compareNotes(a, b) {
+  const pinDifference = Number(b.isPinned === true) - Number(a.isPinned === true);
+  return pinDifference || b.updatedAt - a.updatedAt;
 }
