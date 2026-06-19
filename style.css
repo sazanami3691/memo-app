@@ -27,6 +27,22 @@ body {
   line-height: 1.5;
 }
 
+body.dark-theme {
+  color-scheme: dark;
+  --bg: #111418;
+  --panel: #1b2027;
+  --panel-soft: #232a34;
+  --line: #343d49;
+  --text: #e8edf2;
+  --muted: #a9b3bd;
+  --accent: #8fb27d;
+  --accent-strong: #b4d19f;
+  --accent-soft: #263828;
+  --danger: #ff8b96;
+  --danger-soft: #3a2228;
+  --shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+}
+
 button,
 input,
 textarea {
@@ -41,6 +57,14 @@ button {
   color: var(--text);
   padding: 10px 14px;
   cursor: pointer;
+}
+
+body.dark-theme button,
+body.dark-theme input,
+body.dark-theme textarea {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
 }
 
 button:hover {
@@ -58,6 +82,10 @@ button:disabled {
   color: #fff;
 }
 
+body.dark-theme .primary-button {
+  color: #101712;
+}
+
 .primary-button:hover {
   background: var(--accent-strong);
 }
@@ -65,6 +93,11 @@ button:disabled {
 .danger-button {
   border-color: #efb5bc;
   color: var(--danger);
+}
+
+body.dark-theme .danger-button {
+  border-color: #6f3b45;
+  background: var(--panel);
 }
 
 .app-shell {
@@ -220,6 +253,13 @@ button:disabled {
   padding: 10px;
 }
 
+body.dark-theme .control-panel,
+body.dark-theme .column,
+body.dark-theme .move-note-modal-content,
+body.dark-theme .drawing-modal-content {
+  background: var(--panel);
+}
+
 .control-panel.collapsed {
   display: none;
 }
@@ -229,6 +269,14 @@ button:disabled {
   border-radius: 8px;
   background: var(--panel-soft);
   padding: 10px;
+}
+
+body.dark-theme .control-group,
+body.dark-theme .save-status,
+body.dark-theme .image-block-preview-wrap,
+body.dark-theme .drawing-block-preview-wrap,
+body.dark-theme .drawing-canvas-wrap {
+  background: var(--panel-soft);
 }
 
 .control-group h3 {
@@ -270,6 +318,16 @@ button:disabled {
   text-align: left;
 }
 
+body.dark-theme .folder-item,
+body.dark-theme .nav-list-item,
+body.dark-theme .note-card,
+body.dark-theme .text-block,
+body.dark-theme .image-block,
+body.dark-theme .drawing-block,
+body.dark-theme .preview-content {
+  background: var(--panel);
+}
+
 .folder-item {
   display: flex;
   align-items: center;
@@ -285,6 +343,15 @@ button:disabled {
 .folder-item.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+body.dark-theme .folder-item.selected,
+body.dark-theme .note-card.selected,
+body.dark-theme .mode-button.active-mode,
+body.dark-theme .active-tool {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .folder-name {
@@ -378,6 +445,10 @@ button:disabled {
   background: #fbfdfd;
 }
 
+body.dark-theme .nav-note-item {
+  background: #202832;
+}
+
 .nav-empty-message,
 .nav-current-folder {
   border: 1px dashed var(--line);
@@ -461,6 +532,11 @@ button:disabled {
 .save-status.saving {
   color: #8a6420;
   background: #fff1d6;
+}
+
+body.dark-theme .save-status.saving {
+  color: #ffd58a;
+  background: #3a2d18;
 }
 
 .save-status.error {
@@ -733,6 +809,13 @@ button:disabled {
   background: #fff;
 }
 
+body.dark-theme .preview-drawing,
+body.dark-theme .drawing-block-preview,
+body.dark-theme #drawingCanvas,
+body.dark-theme .image-modal-content img {
+  background: #fff;
+}
+
 .drawing-block-preview-wrap {
   display: flex;
   justify-content: center;
@@ -797,6 +880,11 @@ button:disabled {
   right: 0;
   border-color: #fff;
   background: #fff;
+}
+
+body.dark-theme .image-modal-close {
+  border-color: var(--line);
+  background: var(--panel);
 }
 
 .drawing-modal {

@@ -10,6 +10,7 @@ export const AUTO_SAVE_DELAY = 400;
 export const BACKUP_APP_NAME = "Local Memo Binder";
 export const BACKUP_VERSION = 1;
 export const CONTROL_PANEL_STORAGE_KEY = "memoAppControlPanelOpen";
+export const THEME_STORAGE_KEY = "memoAppTheme";
 
 export const IMAGE_MAX_SIZE = 1200;
 export const IMAGE_JPEG_QUALITY = 0.82;
@@ -33,6 +34,7 @@ export const state = {
   selectedNoteId: null,
   appView: "folders",
   editorMode: "preview",
+  theme: "light",
   controlPanelOpen: false,
   folderNavLevel: "parents",
   activeParentFolderId: null,

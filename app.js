@@ -37,6 +37,12 @@ import {
   openMoveNoteModal
 } from "./js/moveNotes.js";
 import {
+  initializeTheme,
+  renderThemeButton,
+  toggleTheme,
+  updateApp
+} from "./js/options.js";
+import {
   createNoteInSelectedFolder,
   deleteSelectedNote,
   renderEditor,
@@ -63,6 +69,7 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 
 async function initializeApp() {
   collectElements();
+  initializeTheme();
   initializeControlPanelState();
   registerEventListeners();
   setRenderAllAction(renderAll);
@@ -95,6 +102,8 @@ function collectElements() {
   elements.deleteFolderButton = document.getElementById("deleteFolderButton");
   elements.exportBackupButton = document.getElementById("exportBackupButton");
   elements.importBackupButton = document.getElementById("importBackupButton");
+  elements.updateAppButton = document.getElementById("updateAppButton");
+  elements.themeToggleButton = document.getElementById("themeToggleButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -147,13 +156,25 @@ function registerEventListeners() {
   elements.addChildFolderButton.addEventListener("click", createChildFolder);
   elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
   elements.deleteFolderButton.addEventListener("click", deleteSelectedFolder);
-  elements.exportBackupButton.addEventListener("click", exportBackup);
+  elements.exportBackupButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    exportBackup();
+  });
   elements.importBackupButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
     elements.backupFileInput.value = "";
     elements.backupFileInput.click();
   });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
-  elements.addNoteButton.addEventListener("click", createNoteInSelectedFolder);
+  elements.updateAppButton.addEventListener("click", async () => {
+    setControlPanelOpen(false);
+    await updateApp();
+  });
+  elements.themeToggleButton.addEventListener("click", toggleTheme);
+  elements.addNoteButton.addEventListener("click", async () => {
+    await createNoteInSelectedFolder();
+    setControlPanelOpen(false);
+  });
   elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
   elements.screenBackButton.addEventListener("click", handleScreenBack);
   elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
@@ -242,6 +263,7 @@ function renderAll() {
   renderSearchView();
   renderEditor();
   updateActionButtons();
+  renderThemeButton();
   renderAppView();
   renderScreenHeader();
 }
