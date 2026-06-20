@@ -9,6 +9,7 @@
   --accent: #2f7f74;
   --accent-strong: #22665d;
   --accent-soft: #dff1ee;
+  --accent-text: #ffffff;
   --danger: #b84a55;
   --danger-soft: #fde8eb;
   --shadow: 0 10px 30px rgba(36, 49, 52, 0.09);
@@ -35,9 +36,10 @@ body.dark-theme {
   --line: #343d49;
   --text: #e8edf2;
   --muted: #a9b3bd;
-  --accent: #8fb27d;
-  --accent-strong: #b4d19f;
+  --accent: #3f7f45;
+  --accent-strong: #477e4b;
   --accent-soft: #263828;
+  --accent-text: #ffffff;
   --danger: #ff8b96;
   --danger-soft: #3a2228;
   --shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
@@ -79,15 +81,12 @@ button:disabled {
 .primary-button {
   border-color: var(--accent);
   background: var(--accent);
-  color: #fff;
-}
-
-body.dark-theme .primary-button {
-  color: #101712;
+  color: var(--accent-text);
 }
 
 .primary-button:hover {
   background: var(--accent-strong);
+  color: var(--accent-text);
 }
 
 .danger-button {
