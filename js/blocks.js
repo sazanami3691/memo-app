@@ -7,6 +7,9 @@ import { getSelectedNote, renderBlockList, saveCurrentNote, scheduleAutoSave } f
 import { elements } from "./state.js";
 import { createEmptyList, createId } from "./utils.js";
 
+const MZ_MESSAGE_LINE_LIMIT = 4;
+const MZ_MESSAGE_CHAR_LIMIT = 33;
+
 export function createTextBlock(text) {
   return {
     id: createId("block"),
@@ -15,9 +18,21 @@ export function createTextBlock(text) {
   };
 }
 
+export function createMzMessageBlock(text = "") {
+  return {
+    id: createId("block"),
+    type: "mzMessage",
+    text
+  };
+}
+
 export function renderBlock(block, index, blockCount) {
   if (block.type === "text") {
     return renderTextBlock(block, index, blockCount);
+  }
+
+  if (block.type === "mzMessage") {
+    return renderMzMessageBlock(block, index, blockCount);
   }
 
   if (block.type === "image") {
@@ -34,6 +49,10 @@ export function renderBlock(block, index, blockCount) {
 export function renderPreviewBlock(block) {
   if (block.type === "text") {
     return renderPreviewTextBlock(block);
+  }
+
+  if (block.type === "mzMessage") {
+    return renderPreviewMzMessageBlock(block);
   }
 
   if (block.type === "image") {
@@ -76,6 +95,50 @@ export function renderTextBlock(block, index, blockCount) {
   return wrapper;
 }
 
+export function renderMzMessageBlock(block, index, blockCount) {
+  const wrapper = document.createElement("section");
+  wrapper.className = "mz-message-block";
+
+  wrapper.append(
+    createBlockControls(block, index, blockCount),
+    createBlockInsertActions(block.id)
+  );
+
+  const help = document.createElement("div");
+  help.className = "mz-message-help";
+  help.textContent = "1行33文字・最大4行目安。超過しても入力内容は保持されます。";
+
+  const editorWrap = document.createElement("div");
+  editorWrap.className = "mz-message-editor-wrap";
+
+  const textarea = document.createElement("textarea");
+  textarea.className = "mz-message-editor";
+  textarea.value = block.text || "";
+  textarea.placeholder = "MZの文章を入力";
+
+  const stats = document.createElement("div");
+  stats.className = "mz-message-stats";
+
+  const updateStats = () => renderMzMessageStats(stats, textarea.value);
+  textarea.addEventListener("input", () => {
+    block.text = textarea.value;
+    updateStats();
+    scheduleAutoSave();
+  });
+
+  editorWrap.appendChild(textarea);
+  wrapper.append(help, editorWrap, stats);
+  updateStats();
+  return wrapper;
+}
+
+export function renderPreviewMzMessageBlock(block) {
+  const message = document.createElement("div");
+  message.className = "preview-mz-message";
+  message.textContent = block.text || "";
+  return message;
+}
+
 export function createBlockControls(block, index, blockCount) {
   const controls = document.createElement("div");
   controls.className = "block-controls";
@@ -111,6 +174,11 @@ export function createBlockInsertActions(blockId) {
   addTextButton.textContent = "下にテキスト追加";
   addTextButton.addEventListener("click", () => insertTextBlockAfter(blockId));
 
+  const addMzMessageButton = document.createElement("button");
+  addMzMessageButton.type = "button";
+  addMzMessageButton.textContent = "下にMZ文章追加";
+  addMzMessageButton.addEventListener("click", () => insertMzMessageBlockAfter(blockId));
+
   const addImageButton = document.createElement("button");
   addImageButton.type = "button";
   addImageButton.textContent = "下に画像追加";
@@ -121,7 +189,7 @@ export function createBlockInsertActions(blockId) {
   addDrawingButton.textContent = "下に手書き追加";
   addDrawingButton.addEventListener("click", () => insertDrawingBlockAfter(blockId));
 
-  actions.append(addTextButton, addImageButton, addDrawingButton);
+  actions.append(addTextButton, addMzMessageButton, addImageButton, addDrawingButton);
   return actions;
 }
 
@@ -136,6 +204,16 @@ export function addTextBlock() {
   focusLastTextBlock();
 }
 
+export function addMzMessageBlock() {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  note.blocks.push(createMzMessageBlock(""));
+  renderBlockList(note);
+  scheduleAutoSave();
+  focusLastEditableBlock();
+}
+
 export function insertTextBlockAfter(blockId) {
   const note = getSelectedNote();
   if (!note) return;
@@ -143,6 +221,17 @@ export function insertTextBlockAfter(blockId) {
   const index = note.blocks.findIndex((block) => block.id === blockId);
   const insertIndex = index === -1 ? note.blocks.length : index + 1;
   note.blocks.splice(insertIndex, 0, createTextBlock(""));
+  renderBlockList(note);
+  scheduleAutoSave();
+}
+
+export function insertMzMessageBlockAfter(blockId) {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  const index = note.blocks.findIndex((block) => block.id === blockId);
+  const insertIndex = index === -1 ? note.blocks.length : index + 1;
+  note.blocks.splice(insertIndex, 0, createMzMessageBlock(""));
   renderBlockList(note);
   scheduleAutoSave();
 }
@@ -210,4 +299,52 @@ function focusLastTextBlock() {
   const textareas = elements.blockList.querySelectorAll("textarea");
   const lastTextarea = textareas[textareas.length - 1];
   if (lastTextarea) lastTextarea.focus();
+}
+
+function focusLastEditableBlock() {
+  const textareas = elements.blockList.querySelectorAll("textarea");
+  const lastTextarea = textareas[textareas.length - 1];
+  if (lastTextarea) lastTextarea.focus();
+}
+
+function renderMzMessageStats(container, text) {
+  const lines = splitMzMessageLines(text);
+  const hasLineWarning = lines.some((line) => countCharacters(line) > MZ_MESSAGE_CHAR_LIMIT);
+  const hasLineCountWarning = lines.length > MZ_MESSAGE_LINE_LIMIT;
+  container.innerHTML = "";
+
+  const summary = document.createElement("div");
+  summary.className = `mz-message-summary${hasLineCountWarning ? " warning" : ""}`;
+  summary.textContent = `${lines.length}行 / 最大${MZ_MESSAGE_LINE_LIMIT}行目安`;
+  container.appendChild(summary);
+
+  const list = document.createElement("div");
+  list.className = "mz-message-line-counts";
+  lines.forEach((line, index) => {
+    const count = countCharacters(line);
+    const item = document.createElement("span");
+    item.className = `mz-message-line-count${count > MZ_MESSAGE_CHAR_LIMIT ? " warning" : ""}`;
+    item.textContent = `${index + 1}行目: ${count}/${MZ_MESSAGE_CHAR_LIMIT}`;
+    list.appendChild(item);
+  });
+  container.appendChild(list);
+
+  if (hasLineWarning || hasLineCountWarning) {
+    const warning = document.createElement("div");
+    warning.className = "mz-message-warning";
+    warning.textContent = [
+      hasLineWarning ? "33文字を超えた行があります。" : "",
+      hasLineCountWarning ? "4行を超えています。" : ""
+    ].filter(Boolean).join(" ");
+    container.appendChild(warning);
+  }
+}
+
+function splitMzMessageLines(text) {
+  const normalized = String(text || "").replace(/\r\n/g, "\n");
+  return normalized.split("\n");
+}
+
+function countCharacters(text) {
+  return Array.from(text || "").length;
 }

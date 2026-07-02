@@ -1,7 +1,8 @@
 "use strict";
 
 import { handleBackupFileSelected, exportBackup } from "./js/backup.js";
-import { addTextBlock } from "./js/blocks.js";
+import { addMzMessageBlock, addTextBlock } from "./js/blocks.js";
+import { setupImageCropModal } from "./js/cropImage.js";
 import { openDB, loadData } from "./js/db.js";
 import {
   closeDrawingModal,
@@ -118,9 +119,17 @@ function collectElements() {
   elements.editorForm = document.getElementById("editorForm");
   elements.noteTitleInput = document.getElementById("noteTitleInput");
   elements.addTextBlockButton = document.getElementById("addTextBlockButton");
+  elements.addMzMessageBlockButton = document.getElementById("addMzMessageBlockButton");
   elements.addImageBlockButton = document.getElementById("addImageBlockButton");
   elements.addDrawingBlockButton = document.getElementById("addDrawingBlockButton");
   elements.imageFileInput = document.getElementById("imageFileInput");
+  elements.imageCropModal = document.getElementById("imageCropModal");
+  elements.imageCropCloseButton = document.getElementById("imageCropCloseButton");
+  elements.imageCropCanvas = document.getElementById("imageCropCanvas");
+  elements.imageCropResetButton = document.getElementById("imageCropResetButton");
+  elements.imageCropUseWholeButton = document.getElementById("imageCropUseWholeButton");
+  elements.imageCropApplyButton = document.getElementById("imageCropApplyButton");
+  elements.imageCropCancelButton = document.getElementById("imageCropCancelButton");
   elements.blockList = document.getElementById("blockList");
   elements.saveStatus = document.getElementById("saveStatus");
   elements.imageModal = document.getElementById("imageModal");
@@ -146,6 +155,7 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  setupImageCropModal();
   elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
   elements.openSearchButton.addEventListener("click", () => {
     setControlPanelOpen(false);
@@ -188,6 +198,7 @@ function registerEventListeners() {
     renderEditor();
   });
   elements.addTextBlockButton.addEventListener("click", addTextBlock);
+  elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);

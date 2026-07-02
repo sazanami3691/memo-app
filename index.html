@@ -119,6 +119,7 @@
           <h3>本文ブロック</h3>
           <div class="toolbar-actions">
             <button id="addTextBlockButton" class="primary-button" type="button">テキストブロック追加</button>
+            <button id="addMzMessageBlockButton" class="primary-button" type="button">MZ文章追加</button>
             <button id="addImageBlockButton" class="primary-button" type="button">画像ブロック追加</button>
             <button id="addDrawingBlockButton" class="primary-button" type="button">手書きブロック追加</button>
           </div>
@@ -131,6 +132,28 @@
 
   <input id="imageFileInput" class="hidden" type="file" accept="image/*">
   <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
+
+  <div id="imageCropModal" class="image-crop-modal hidden" aria-hidden="true">
+    <div class="image-crop-modal-content" role="dialog" aria-modal="true" aria-label="画像トリミング">
+      <header class="image-crop-modal-header">
+        <h2>画像トリミング</h2>
+        <button id="imageCropCloseButton" type="button">閉じる</button>
+      </header>
+
+      <p class="image-crop-help">枠をドラッグで移動、右下のハンドルでサイズ変更できます。</p>
+
+      <div class="image-crop-canvas-wrap">
+        <canvas id="imageCropCanvas" width="1000" height="650"></canvas>
+      </div>
+
+      <footer class="image-crop-modal-footer">
+        <button id="imageCropResetButton" type="button">中央にリセット</button>
+        <button id="imageCropUseWholeButton" type="button">画像全体を使う</button>
+        <button id="imageCropApplyButton" class="primary-button" type="button">トリミングして追加</button>
+        <button id="imageCropCancelButton" type="button">キャンセル</button>
+      </footer>
+    </div>
+  </div>
 
   <div id="imageModal" class="image-modal hidden" aria-hidden="true">
     <div class="image-modal-content" role="dialog" aria-modal="true" aria-label="画像プレビュー">

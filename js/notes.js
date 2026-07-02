@@ -280,6 +280,7 @@ export function updateActionButtons() {
   elements.togglePinButton.disabled = !hasNote;
   elements.moveNoteButton.disabled = !hasNote;
   elements.addTextBlockButton.disabled = !hasNote;
+  elements.addMzMessageBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
 }

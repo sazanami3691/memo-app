@@ -321,6 +321,7 @@ body.dark-theme .folder-item,
 body.dark-theme .nav-list-item,
 body.dark-theme .note-card,
 body.dark-theme .text-block,
+body.dark-theme .mz-message-block,
 body.dark-theme .image-block,
 body.dark-theme .drawing-block,
 body.dark-theme .preview-content {
@@ -737,6 +738,7 @@ body.dark-theme .save-status.saving {
 
 .title-input:focus,
 .text-block-input:focus,
+.mz-message-editor:focus,
 .image-caption-input:focus,
 .drawing-caption-input:focus {
   border-color: var(--accent);
@@ -744,6 +746,7 @@ body.dark-theme .save-status.saving {
 }
 
 .text-block,
+.mz-message-block,
 .image-block,
 .drawing-block {
   border: 1px solid var(--line);
@@ -783,6 +786,93 @@ body.dark-theme .save-status.saving {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px 14px;
+}
+
+.mz-message-help {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.mz-message-editor-wrap {
+  position: relative;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Noto Sans Mono", monospace;
+  margin-bottom: 10px;
+}
+
+.mz-message-editor-wrap::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: calc(33ch + 18px);
+  border-left: 1px dashed rgba(255, 255, 255, 0.72);
+  pointer-events: none;
+}
+
+.mz-message-editor {
+  width: 100%;
+  min-height: 8.2em;
+  resize: vertical;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 8px;
+  background: rgba(18, 26, 46, 0.96);
+  color: #ffffff;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Noto Sans Mono", monospace;
+  line-height: 1.7;
+  padding: 12px 16px;
+  white-space: pre-wrap;
+}
+
+body.dark-theme .mz-message-editor {
+  background: rgba(12, 18, 32, 0.98);
+  color: #ffffff;
+}
+
+.mz-message-stats {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.mz-message-line-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mz-message-line-count {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  padding: 4px 8px;
+}
+
+.mz-message-summary.warning,
+.mz-message-line-count.warning,
+.mz-message-warning {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.mz-message-line-count.warning {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.preview-mz-message {
+  box-sizing: border-box;
+  width: min(100%, 38em);
+  border: 2px solid rgba(255, 255, 255, 0.76);
+  border-radius: 8px;
+  background: rgba(18, 26, 46, 0.96);
+  color: #ffffff;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Noto Sans Mono", monospace;
+  line-height: 1.7;
+  padding: 14px 16px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .image-block-preview-wrap {
@@ -884,6 +974,81 @@ body.dark-theme .image-modal-content img {
 body.dark-theme .image-modal-close {
   border-color: var(--line);
   background: var(--panel);
+}
+
+.image-crop-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 20, 22, 0.72);
+  padding: 14px;
+}
+
+.image-crop-modal.hidden {
+  display: none;
+}
+
+.image-crop-modal-content {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  width: min(1080px, 96vw);
+  max-height: 96vh;
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.image-crop-modal-header,
+.image-crop-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.image-crop-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.image-crop-help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.image-crop-canvas-wrap {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  padding: 8px;
+}
+
+#imageCropCanvas {
+  display: block;
+  width: min(100%, 1000px);
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #111820;
+  touch-action: none;
+  user-select: none;
+}
+
+.image-crop-modal-footer {
+  flex-wrap: wrap;
+}
+
+.image-crop-modal-footer button {
+  min-height: 44px;
 }
 
 .drawing-modal {

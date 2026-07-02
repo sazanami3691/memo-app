@@ -2,6 +2,7 @@
 
 import { createBlockControls, createBlockInsertActions, insertBlock } from "./blocks.js";
 import { createMissingAssetMessage, getAssetById } from "./assets.js";
+import { openImageCropModal } from "./cropImage.js";
 import { saveAsset } from "./db.js";
 import { saveCurrentNote, scheduleAutoSave, setSaveStatus } from "./notes.js";
 import { appActions, elements, IMAGE_JPEG_QUALITY, IMAGE_MAX_SIZE, state } from "./state.js";
@@ -43,7 +44,16 @@ export async function handleImageFileSelected() {
 
   try {
     setSaveStatus("画像処理中...", "saving");
-    const asset = await createImageAsset(file);
+    const cropResult = await openImageCropModal(file);
+    if (!cropResult) {
+      setSaveStatus("保存済み");
+      return;
+    }
+
+    const asset = cropResult.useWholeImage
+      ? await createImageAsset(file)
+      : await createImageAssetFromDataUrl(cropResult.dataUrl, file.name || "image.jpg");
+
     const block = createImageBlock(asset.id);
     insertBlock(block, state.pendingImageInsertAfterBlockId);
     state.pendingImageInsertAfterBlockId = null;
@@ -53,6 +63,8 @@ export async function handleImageFileSelected() {
     console.error(error);
     alert("画像の読み込みまたは縮小に失敗しました。");
     setSaveStatus("保存エラー", "error");
+  } finally {
+    elements.imageFileInput.value = "";
   }
 }
 
@@ -63,6 +75,21 @@ export async function createImageAsset(file) {
     type: "image",
     dataUrl,
     fileName: file.name || "image.jpg",
+    mimeType: "image/jpeg",
+    createdAt: Date.now()
+  };
+
+  await saveAsset(asset);
+  state.assets.push(asset);
+  return asset;
+}
+
+export async function createImageAssetFromDataUrl(dataUrl, fileName) {
+  const asset = {
+    id: createId("asset"),
+    type: "image",
+    dataUrl,
+    fileName: fileName || "image.jpg",
     mimeType: "image/jpeg",
     createdAt: Date.now()
   };

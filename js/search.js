@@ -87,7 +87,8 @@ function searchNotes(query) {
 
       const blocks = Array.isArray(note.blocks) ? note.blocks : [];
       const textMatched = blocks.some((block) => {
-        return block.type === "text" && normalizeSearchText(block.text).includes(query);
+        return (block.type === "text" || block.type === "mzMessage") &&
+          normalizeSearchText(block.text).includes(query);
       });
       if (textMatched) {
         reasons.push("本文一致");
