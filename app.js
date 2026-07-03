@@ -38,8 +38,11 @@ import {
   openMoveNoteModal
 } from "./js/moveNotes.js";
 import {
+  initializeMzDisplayMode,
   initializeTheme,
+  renderMzDisplayModeButton,
   renderThemeButton,
+  toggleMzDisplayMode,
   toggleTheme,
   updateApp
 } from "./js/options.js";
@@ -71,6 +74,7 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 async function initializeApp() {
   collectElements();
   initializeTheme();
+  initializeMzDisplayMode();
   initializeControlPanelState();
   registerEventListeners();
   setRenderAllAction(renderAll);
@@ -105,6 +109,7 @@ function collectElements() {
   elements.importBackupButton = document.getElementById("importBackupButton");
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
+  elements.mzDisplayModeButton = document.getElementById("mzDisplayModeButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -122,6 +127,7 @@ function collectElements() {
   elements.addMzMessageBlockButton = document.getElementById("addMzMessageBlockButton");
   elements.addImageBlockButton = document.getElementById("addImageBlockButton");
   elements.addDrawingBlockButton = document.getElementById("addDrawingBlockButton");
+  elements.scrollToLastBlockButton = document.getElementById("scrollToLastBlockButton");
   elements.imageFileInput = document.getElementById("imageFileInput");
   elements.imageCropModal = document.getElementById("imageCropModal");
   elements.imageCropCloseButton = document.getElementById("imageCropCloseButton");
@@ -181,6 +187,10 @@ function registerEventListeners() {
     await updateApp();
   });
   elements.themeToggleButton.addEventListener("click", toggleTheme);
+  elements.mzDisplayModeButton.addEventListener("click", () => {
+    toggleMzDisplayMode();
+    renderEditor();
+  });
   elements.addNoteButton.addEventListener("click", async () => {
     await createNoteInSelectedFolder();
     setControlPanelOpen(false);
@@ -201,6 +211,7 @@ function registerEventListeners() {
   elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
+  elements.scrollToLastBlockButton.addEventListener("click", scrollToLastBlock);
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
   elements.imageModalClose.addEventListener("click", closeImageModal);
   elements.imageModal.addEventListener("click", (event) => {
@@ -275,8 +286,15 @@ function renderAll() {
   renderEditor();
   updateActionButtons();
   renderThemeButton();
+  renderMzDisplayModeButton();
   renderAppView();
   renderScreenHeader();
+}
+
+function scrollToLastBlock() {
+  const lastBlock = elements.blockList.lastElementChild;
+  if (!lastBlock) return;
+  lastBlock.scrollIntoView({ behavior: "smooth", block: "end" });
 }
 
 function renderAppView() {

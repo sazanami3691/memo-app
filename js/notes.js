@@ -283,6 +283,7 @@ export function updateActionButtons() {
   elements.addMzMessageBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
+  elements.scrollToLastBlockButton.disabled = !hasNote;
 }
 
 function canCreateNoteInCurrentView(selectedFolder) {

@@ -94,6 +94,13 @@ function searchNotes(query) {
         reasons.push("本文一致");
       }
 
+      const mzSpeakerMatched = blocks.some((block) => {
+        return block.type === "mzMessage" && normalizeSearchText(block.speakerName).includes(query);
+      });
+      if (mzSpeakerMatched) {
+        reasons.push("セリフ主一致");
+      }
+
       const captionMatched = blocks.some((block) => {
         return (block.type === "image" || block.type === "drawing") &&
           normalizeSearchText(block.caption).includes(query);

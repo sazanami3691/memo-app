@@ -1,13 +1,20 @@
 "use strict";
 
-import { elements, state, THEME_STORAGE_KEY } from "./state.js";
+import { elements, MZ_DISPLAY_MODE_STORAGE_KEY, state, THEME_STORAGE_KEY } from "./state.js";
 
 const LIGHT_THEME = "light";
 const DARK_THEME = "dark";
+const MZ_DISPLAY_NORMAL = "normal";
+const MZ_DISPLAY_WINDOW = "window";
 
 export function initializeTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   applyTheme(savedTheme === DARK_THEME ? DARK_THEME : LIGHT_THEME);
+}
+
+export function initializeMzDisplayMode() {
+  const savedMode = localStorage.getItem(MZ_DISPLAY_MODE_STORAGE_KEY);
+  applyMzDisplayMode(savedMode === MZ_DISPLAY_NORMAL ? MZ_DISPLAY_NORMAL : MZ_DISPLAY_WINDOW);
 }
 
 export function toggleTheme() {
@@ -16,12 +23,26 @@ export function toggleTheme() {
   applyTheme(nextTheme);
 }
 
+export function toggleMzDisplayMode() {
+  const nextMode = state.mzDisplayMode === MZ_DISPLAY_WINDOW ? MZ_DISPLAY_NORMAL : MZ_DISPLAY_WINDOW;
+  localStorage.setItem(MZ_DISPLAY_MODE_STORAGE_KEY, nextMode);
+  applyMzDisplayMode(nextMode);
+}
+
 export function renderThemeButton() {
   if (!elements.themeToggleButton) return;
 
   elements.themeToggleButton.textContent = state.theme === DARK_THEME
     ? "ライトテーマに切替"
     : "ダークテーマに切替";
+}
+
+export function renderMzDisplayModeButton() {
+  if (!elements.mzDisplayModeButton) return;
+
+  elements.mzDisplayModeButton.textContent = state.mzDisplayMode === MZ_DISPLAY_WINDOW
+    ? "MZ表示を通常にする"
+    : "MZ表示をウィンドウにする";
 }
 
 export async function updateApp() {
@@ -48,6 +69,11 @@ function applyTheme(theme) {
   state.theme = theme;
   document.body.classList.toggle("dark-theme", theme === DARK_THEME);
   renderThemeButton();
+}
+
+function applyMzDisplayMode(mode) {
+  state.mzDisplayMode = mode;
+  renderMzDisplayModeButton();
 }
 
 async function clearAppCachesIfAvailable() {

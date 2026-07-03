@@ -11,6 +11,7 @@ export const BACKUP_APP_NAME = "Local Memo Binder";
 export const BACKUP_VERSION = 1;
 export const CONTROL_PANEL_STORAGE_KEY = "memoAppControlPanelOpen";
 export const THEME_STORAGE_KEY = "memoAppTheme";
+export const MZ_DISPLAY_MODE_STORAGE_KEY = "memoAppMzDisplayMode";
 
 export const IMAGE_MAX_SIZE = 1200;
 export const IMAGE_JPEG_QUALITY = 0.82;
@@ -35,6 +36,7 @@ export const state = {
   appView: "folders",
   editorMode: "preview",
   theme: "light",
+  mzDisplayMode: "window",
   controlPanelOpen: false,
   folderNavLevel: "parents",
   activeParentFolderId: null,
