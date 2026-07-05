@@ -282,6 +282,7 @@ export function updateActionButtons() {
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addMzMessageBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
+  elements.addReusableImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
   elements.scrollToLastBlockButton.disabled = !hasNote;
 }

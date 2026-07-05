@@ -56,10 +56,10 @@
         <section class="control-group">
           <h3>オプション</h3>
           <div class="button-stack">
+            <button id="registerReusableImageButton" type="button">よく使う画像を登録</button>
             <button id="updateAppButton" type="button">アプリを更新</button>
             <button id="themeToggleButton" type="button">ダークテーマに切替</button>
             <button id="mzDisplayModeButton" type="button">MZ表示を通常にする</button>
-            <button id="mzUiModeButton" type="button">MZ風UIを有効にする</button>
           </div>
         </section>
       </div>
@@ -123,6 +123,7 @@
             <button id="addTextBlockButton" class="primary-button" type="button">テキストブロック追加</button>
             <button id="addMzMessageBlockButton" class="primary-button" type="button">MZ文章追加</button>
             <button id="addImageBlockButton" class="primary-button" type="button">画像ブロック追加</button>
+            <button id="addReusableImageBlockButton" class="primary-button" type="button">登録画像から追加</button>
             <button id="addDrawingBlockButton" class="primary-button" type="button">手書きブロック追加</button>
             <button id="scrollToLastBlockButton" type="button">↓ 一番下へ</button>
           </div>
@@ -134,6 +135,7 @@
   </div>
 
   <input id="imageFileInput" class="hidden" type="file" accept="image/*">
+  <input id="reusableImageFileInput" class="hidden" type="file" accept="image/*">
   <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
 
   <div id="imageCropModal" class="image-crop-modal hidden" aria-hidden="true">
@@ -203,6 +205,19 @@
       <div id="moveNoteFolderList" class="move-note-folder-list"></div>
       <footer class="move-note-modal-footer">
         <button id="moveNoteCancelButton" type="button">キャンセル</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="reusableImageModal" class="reusable-image-modal hidden" aria-hidden="true">
+    <div class="reusable-image-modal-content" role="dialog" aria-modal="true" aria-labelledby="reusableImageModalTitle">
+      <header class="reusable-image-modal-header">
+        <h2 id="reusableImageModalTitle">登録画像</h2>
+        <button id="reusableImageModalCloseButton" type="button">閉じる</button>
+      </header>
+      <div id="reusableImageList" class="reusable-image-list"></div>
+      <footer class="reusable-image-modal-footer">
+        <button id="reusableImageModalCancelButton" type="button">閉じる</button>
       </footer>
     </div>
   </div>

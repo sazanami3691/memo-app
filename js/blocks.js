@@ -8,7 +8,7 @@ import { elements, state } from "./state.js";
 import { createEmptyList, createId } from "./utils.js";
 
 const MZ_MESSAGE_LINE_LIMIT = 4;
-const MZ_MESSAGE_CHAR_LIMIT = 33;
+const MZ_MESSAGE_CHAR_LIMIT = 30;
 
 export function createTextBlock(text) {
   return {
@@ -107,7 +107,7 @@ export function renderMzMessageBlock(block, index, blockCount) {
 
   const help = document.createElement("div");
   help.className = "mz-message-help";
-  help.textContent = "1行33文字・最大4行目安。超過しても入力内容は保持されます。";
+  help.textContent = `1行${MZ_MESSAGE_CHAR_LIMIT}文字・最大${MZ_MESSAGE_LINE_LIMIT}行目安。超過しても入力内容は保持されます。`;
 
   const speakerField = document.createElement("label");
   speakerField.className = "mz-message-speaker-field";
@@ -374,7 +374,7 @@ function renderMzMessageStats(container, text) {
     const warning = document.createElement("div");
     warning.className = "mz-message-warning";
     warning.textContent = [
-      hasLineWarning ? "33文字を超えた行があります。" : "",
+      hasLineWarning ? `${MZ_MESSAGE_CHAR_LIMIT}文字を超えた行があります。` : "",
       hasLineCountWarning ? "4行を超えています。" : ""
     ].filter(Boolean).join(" ");
     container.appendChild(warning);

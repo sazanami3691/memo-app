@@ -38,15 +38,18 @@ import {
   openMoveNoteModal
 } from "./js/moveNotes.js";
 import {
+  closeReusableImageModal,
+  handleReusableImageFileSelected,
+  openReusableImageModal,
+  registerReusableImage
+} from "./js/reusableImages.js";
+import {
   initializeMzDisplayMode,
   initializeTheme,
-  initializeUiStyle,
   renderMzDisplayModeButton,
   renderThemeButton,
-  renderUiStyleButton,
   toggleMzDisplayMode,
   toggleTheme,
-  toggleUiStyle,
   updateApp
 } from "./js/options.js";
 import {
@@ -78,7 +81,6 @@ async function initializeApp() {
   collectElements();
   initializeTheme();
   initializeMzDisplayMode();
-  initializeUiStyle();
   initializeControlPanelState();
   registerEventListeners();
   setRenderAllAction(renderAll);
@@ -111,10 +113,10 @@ function collectElements() {
   elements.deleteFolderButton = document.getElementById("deleteFolderButton");
   elements.exportBackupButton = document.getElementById("exportBackupButton");
   elements.importBackupButton = document.getElementById("importBackupButton");
+  elements.registerReusableImageButton = document.getElementById("registerReusableImageButton");
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
   elements.mzDisplayModeButton = document.getElementById("mzDisplayModeButton");
-  elements.mzUiModeButton = document.getElementById("mzUiModeButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -131,9 +133,11 @@ function collectElements() {
   elements.addTextBlockButton = document.getElementById("addTextBlockButton");
   elements.addMzMessageBlockButton = document.getElementById("addMzMessageBlockButton");
   elements.addImageBlockButton = document.getElementById("addImageBlockButton");
+  elements.addReusableImageBlockButton = document.getElementById("addReusableImageBlockButton");
   elements.addDrawingBlockButton = document.getElementById("addDrawingBlockButton");
   elements.scrollToLastBlockButton = document.getElementById("scrollToLastBlockButton");
   elements.imageFileInput = document.getElementById("imageFileInput");
+  elements.reusableImageFileInput = document.getElementById("reusableImageFileInput");
   elements.imageCropModal = document.getElementById("imageCropModal");
   elements.imageCropCloseButton = document.getElementById("imageCropCloseButton");
   elements.imageCropCanvas = document.getElementById("imageCropCanvas");
@@ -163,6 +167,10 @@ function collectElements() {
   elements.moveNoteModalCloseButton = document.getElementById("moveNoteModalCloseButton");
   elements.moveNoteFolderList = document.getElementById("moveNoteFolderList");
   elements.moveNoteCancelButton = document.getElementById("moveNoteCancelButton");
+  elements.reusableImageModal = document.getElementById("reusableImageModal");
+  elements.reusableImageModalCloseButton = document.getElementById("reusableImageModalCloseButton");
+  elements.reusableImageList = document.getElementById("reusableImageList");
+  elements.reusableImageModalCancelButton = document.getElementById("reusableImageModalCancelButton");
 }
 
 function registerEventListeners() {
@@ -187,6 +195,10 @@ function registerEventListeners() {
     elements.backupFileInput.click();
   });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
+  elements.registerReusableImageButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    registerReusableImage();
+  });
   elements.updateAppButton.addEventListener("click", async () => {
     setControlPanelOpen(false);
     await updateApp();
@@ -194,10 +206,6 @@ function registerEventListeners() {
   elements.themeToggleButton.addEventListener("click", toggleTheme);
   elements.mzDisplayModeButton.addEventListener("click", () => {
     toggleMzDisplayMode();
-    renderEditor();
-  });
-  elements.mzUiModeButton.addEventListener("click", () => {
-    toggleUiStyle();
     renderEditor();
   });
   elements.addNoteButton.addEventListener("click", async () => {
@@ -219,9 +227,11 @@ function registerEventListeners() {
   elements.addTextBlockButton.addEventListener("click", addTextBlock);
   elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
+  elements.addReusableImageBlockButton.addEventListener("click", openReusableImageModal);
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
   elements.scrollToLastBlockButton.addEventListener("click", scrollToLastBlock);
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
+  elements.reusableImageFileInput.addEventListener("change", handleReusableImageFileSelected);
   elements.imageModalClose.addEventListener("click", closeImageModal);
   elements.imageModal.addEventListener("click", (event) => {
     if (event.target === elements.imageModal) {
@@ -249,6 +259,13 @@ function registerEventListeners() {
   elements.moveNoteModal.addEventListener("click", (event) => {
     if (event.target === elements.moveNoteModal) {
       closeMoveNoteModal();
+    }
+  });
+  elements.reusableImageModalCloseButton.addEventListener("click", closeReusableImageModal);
+  elements.reusableImageModalCancelButton.addEventListener("click", closeReusableImageModal);
+  elements.reusableImageModal.addEventListener("click", (event) => {
+    if (event.target === elements.reusableImageModal) {
+      closeReusableImageModal();
     }
   });
 
@@ -296,7 +313,6 @@ function renderAll() {
   updateActionButtons();
   renderThemeButton();
   renderMzDisplayModeButton();
-  renderUiStyleButton();
   renderAppView();
   renderScreenHeader();
 }
