@@ -40,10 +40,13 @@ import {
 import {
   initializeMzDisplayMode,
   initializeTheme,
+  initializeUiStyle,
   renderMzDisplayModeButton,
   renderThemeButton,
+  renderUiStyleButton,
   toggleMzDisplayMode,
   toggleTheme,
+  toggleUiStyle,
   updateApp
 } from "./js/options.js";
 import {
@@ -75,6 +78,7 @@ async function initializeApp() {
   collectElements();
   initializeTheme();
   initializeMzDisplayMode();
+  initializeUiStyle();
   initializeControlPanelState();
   registerEventListeners();
   setRenderAllAction(renderAll);
@@ -110,6 +114,7 @@ function collectElements() {
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
   elements.mzDisplayModeButton = document.getElementById("mzDisplayModeButton");
+  elements.mzUiModeButton = document.getElementById("mzUiModeButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -189,6 +194,10 @@ function registerEventListeners() {
   elements.themeToggleButton.addEventListener("click", toggleTheme);
   elements.mzDisplayModeButton.addEventListener("click", () => {
     toggleMzDisplayMode();
+    renderEditor();
+  });
+  elements.mzUiModeButton.addEventListener("click", () => {
+    toggleUiStyle();
     renderEditor();
   });
   elements.addNoteButton.addEventListener("click", async () => {
@@ -287,6 +296,7 @@ function renderAll() {
   updateActionButtons();
   renderThemeButton();
   renderMzDisplayModeButton();
+  renderUiStyleButton();
   renderAppView();
   renderScreenHeader();
 }
