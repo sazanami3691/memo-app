@@ -1,0 +1,79 @@
+﻿.drawing-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 20, 22, 0.72);
+  padding: 14px;
+}
+
+.drawing-modal.hidden {
+  display: none;
+}
+
+.drawing-modal-content {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 12px;
+  width: min(1120px, 96vw);
+  max-height: 96vh;
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.drawing-modal-header,
+.drawing-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.drawing-modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.drawing-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.drawing-toolbar button,
+.drawing-modal-footer button {
+  min-height: 44px;
+}
+
+.active-tool {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.drawing-canvas-wrap {
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  padding: 8px;
+  text-align: center;
+}
+
+#drawingCanvas {
+  display: block;
+  width: min(100%, 960px);
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  touch-action: none;
+  user-select: none;
+}

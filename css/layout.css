@@ -1,0 +1,119 @@
+﻿.app-shell {
+  display: block;
+  width: min(1180px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.app-controls {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.screen-header {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(44px, auto);
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 10px;
+}
+
+.screen-header-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+.screen-header-title {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.column {
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  overflow: auto;
+}
+
+.screen-panel {
+  width: 100%;
+  min-height: calc(100vh - 92px);
+}
+
+.hidden-screen {
+  display: none !important;
+}
+
+.column-header,
+.content-header,
+.editor-header,
+.block-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.column-header h1,
+.column-header h2,
+.content-header h2,
+.editor-header h2,
+.block-toolbar h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.folder-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.folder-actions .danger-button {
+  grid-column: span 2;
+}
+
+.backup-actions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+

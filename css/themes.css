@@ -1,0 +1,93 @@
+﻿body.dark-theme {
+  color-scheme: dark;
+  --bg: #111418;
+  --panel: #1b2027;
+  --panel-soft: #232a34;
+  --line: #343d49;
+  --text: #e8edf2;
+  --muted: #a9b3bd;
+  --accent: #3f7f45;
+  --accent-strong: #477e4b;
+  --accent-soft: #263828;
+  --accent-text: #ffffff;
+  --danger: #ff8b96;
+  --danger-soft: #3a2228;
+  --shadow: 0 14px 34px rgba(0, 0, 0, 0.36);
+}
+
+body.dark-theme button,
+body.dark-theme input,
+body.dark-theme textarea {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+body.dark-theme .danger-button {
+  border-color: #6f3b45;
+  background: var(--panel);
+}
+
+body.dark-theme .control-panel,
+body.dark-theme .column,
+body.dark-theme .move-note-modal-content,
+body.dark-theme .reusable-image-modal-content,
+body.dark-theme .drawing-modal-content {
+  background: var(--panel);
+}
+
+body.dark-theme .control-group,
+body.dark-theme .reusable-image-item,
+body.dark-theme .save-status,
+body.dark-theme .image-block-preview-wrap,
+body.dark-theme .drawing-block-preview-wrap,
+body.dark-theme .drawing-canvas-wrap {
+  background: var(--panel-soft);
+}
+
+body.dark-theme .folder-item,
+body.dark-theme .nav-list-item,
+body.dark-theme .note-card,
+body.dark-theme .text-block,
+body.dark-theme .mz-message-block,
+body.dark-theme .image-block,
+body.dark-theme .drawing-block,
+body.dark-theme .preview-content {
+  background: var(--panel);
+}
+
+body.dark-theme .folder-item.selected,
+body.dark-theme .note-card.selected,
+body.dark-theme .mode-button.active-mode,
+body.dark-theme .active-tool {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+body.dark-theme .nav-note-item {
+  background: #202832;
+}
+
+body.dark-theme .save-status.saving {
+  color: #ffd58a;
+  background: #3a2d18;
+}
+
+body.dark-theme .preview-drawing,
+body.dark-theme .drawing-block-preview,
+body.dark-theme #drawingCanvas,
+body.dark-theme .image-modal-content img {
+  background: #fff;
+}
+
+body.dark-theme .image-modal-close {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
+body.dark-theme .mz-message-editor {
+  background: rgba(12, 18, 32, 0.98);
+  color: #ffffff;
+}
+

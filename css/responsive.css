@@ -1,0 +1,45 @@
+﻿.empty-list {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 18px;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .column {
+    max-height: none;
+  }
+
+  .screen-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .screen-header-title {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .reusable-image-item {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+
+  .reusable-image-thumb {
+    width: 78px;
+    height: 58px;
+  }
+
+  .reusable-image-actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .reusable-image-actions button {
+    flex: 1 1 120px;
+  }
+}
