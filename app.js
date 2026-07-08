@@ -176,33 +176,33 @@ function collectElements() {
 function registerEventListeners() {
   registerControlPanelToggle();
   setupImageCropModal();
-  elements.openSearchButton.addEventListener("click", () => runControlPanelAction(openSearchView));
+  elements.openSearchButton.addEventListener("click", openSearchView);
   elements.searchInput.addEventListener("input", handleSearchInput);
-  elements.addParentFolderButton.addEventListener("click", () => runControlPanelAction(createParentFolder));
-  elements.addChildFolderButton.addEventListener("click", () => runControlPanelAction(createChildFolder));
-  elements.renameFolderButton.addEventListener("click", () => runControlPanelAction(renameSelectedFolder));
-  elements.deleteFolderButton.addEventListener("click", () => runControlPanelAction(deleteSelectedFolder));
-  elements.exportBackupButton.addEventListener("click", () => runControlPanelAction(exportBackup));
-  elements.importBackupButton.addEventListener("click", () => runControlPanelAction(() => {
+  elements.addParentFolderButton.addEventListener("click", createParentFolder);
+  elements.addChildFolderButton.addEventListener("click", createChildFolder);
+  elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
+  elements.deleteFolderButton.addEventListener("click", deleteSelectedFolder);
+  elements.exportBackupButton.addEventListener("click", exportBackup);
+  elements.importBackupButton.addEventListener("click", () => {
     elements.backupFileInput.value = "";
     elements.backupFileInput.click();
-  }));
+  });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
-  elements.registerReusableImageButton.addEventListener("click", () => runControlPanelAction(registerReusableImage));
-  elements.updateAppButton.addEventListener("click", () => runControlPanelAction(updateApp));
-  elements.themeToggleButton.addEventListener("click", () => runControlPanelAction(toggleTheme));
-  elements.mzDisplayModeButton.addEventListener("click", () => runControlPanelAction(() => {
+  elements.registerReusableImageButton.addEventListener("click", registerReusableImage);
+  elements.updateAppButton.addEventListener("click", updateApp);
+  elements.themeToggleButton.addEventListener("click", toggleTheme);
+  elements.mzDisplayModeButton.addEventListener("click", () => {
     toggleMzDisplayMode();
     renderEditor();
-  }));
+  });
   elements.addNoteButton.addEventListener("click", async () => {
     await createNoteInSelectedFolder();
     closeControlPanelAfterAction();
   });
-  elements.deleteSelectedNoteButton.addEventListener("click", () => runControlPanelAction(deleteSelectedNote));
+  elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
   elements.screenBackButton.addEventListener("click", handleScreenBack);
-  elements.togglePinButton.addEventListener("click", () => runControlPanelAction(toggleSelectedNotePin));
-  elements.moveNoteButton.addEventListener("click", () => runControlPanelAction(openMoveNoteModal));
+  elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
+  elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -293,20 +293,6 @@ function toggleControlPanel() {
 
 function closeControlPanelAfterAction() {
   setControlPanelOpen(false);
-}
-
-function runControlPanelAction(action) {
-  try {
-    const result = action();
-    if (result && typeof result.finally === "function") {
-      return result.finally(closeControlPanelAfterAction);
-    }
-    closeControlPanelAfterAction();
-    return result;
-  } catch (error) {
-    closeControlPanelAfterAction();
-    throw error;
-  }
 }
 
 function setControlPanelOpen(isOpen) {
