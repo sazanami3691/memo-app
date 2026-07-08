@@ -7,8 +7,19 @@
 }
 
 .app-controls {
-  position: relative;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 40;
   margin-bottom: 10px;
+  padding: 8px 0 10px;
+  background: var(--bg);
+}
+
+@supports (top: env(safe-area-inset-top)) {
+  .app-controls {
+    top: env(safe-area-inset-top);
+  }
 }
 
 .screen-header {
@@ -42,6 +53,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .column {
@@ -51,7 +63,7 @@
   border-radius: 8px;
   box-shadow: var(--shadow);
   padding: 16px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .screen-panel {

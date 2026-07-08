@@ -13,6 +13,7 @@
   line-height: 1;
   pointer-events: auto;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .control-panel-toggle {
@@ -331,5 +332,54 @@
 
 .note-actions button {
   min-height: 44px;
+}
+
+.add-menu-icon-button {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.add-panel {
+  display: grid;
+  gap: 10px;
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 28px));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 10px;
+}
+
+.control-panel,
+.add-panel {
+  touch-action: manipulation;
+}
+
+.control-panel.collapsed,
+#controlPanel.collapsed,
+.add-panel.collapsed,
+#addPanel.collapsed {
+  display: none;
+  pointer-events: none;
+}
+
+.control-panel:not(.collapsed),
+#controlPanel:not(.collapsed),
+.add-panel:not(.collapsed),
+#addPanel:not(.collapsed) {
+  pointer-events: auto;
 }
 
