@@ -66,15 +66,13 @@ export async function handleReusableImageFileSelected() {
   }
 }
 
-export function openReusableImageModal(options = {}) {
-  state.pendingReusableImageInsertAfterBlockId = options.afterBlockId || null;
+export function openReusableImageModal() {
   renderReusableImageList();
   elements.reusableImageModal.classList.remove("hidden");
   elements.reusableImageModal.setAttribute("aria-hidden", "false");
 }
 
 export function closeReusableImageModal() {
-  state.pendingReusableImageInsertAfterBlockId = null;
   elements.reusableImageModal.classList.add("hidden");
   elements.reusableImageModal.setAttribute("aria-hidden", "true");
 }
@@ -153,8 +151,7 @@ async function addReusableImageToCurrentNote(assetId) {
   if (!state.selectedNoteId) return;
 
   const block = createImageBlock(assetId);
-  insertBlock(block, state.pendingReusableImageInsertAfterBlockId);
-  state.pendingReusableImageInsertAfterBlockId = null;
+  insertBlock(block, null);
   state.editorMode = "edit";
   closeReusableImageModal();
   appActions.renderAll();

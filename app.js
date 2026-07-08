@@ -174,22 +174,35 @@ function collectElements() {
 }
 
 function registerEventListeners() {
-  registerControlPanelToggle();
   setupImageCropModal();
-  elements.openSearchButton.addEventListener("click", openSearchView);
+  elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
+  elements.openSearchButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    openSearchView();
+  });
   elements.searchInput.addEventListener("input", handleSearchInput);
   elements.addParentFolderButton.addEventListener("click", createParentFolder);
   elements.addChildFolderButton.addEventListener("click", createChildFolder);
   elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
   elements.deleteFolderButton.addEventListener("click", deleteSelectedFolder);
-  elements.exportBackupButton.addEventListener("click", exportBackup);
+  elements.exportBackupButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    exportBackup();
+  });
   elements.importBackupButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
     elements.backupFileInput.value = "";
     elements.backupFileInput.click();
   });
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
-  elements.registerReusableImageButton.addEventListener("click", registerReusableImage);
-  elements.updateAppButton.addEventListener("click", updateApp);
+  elements.registerReusableImageButton.addEventListener("click", () => {
+    setControlPanelOpen(false);
+    registerReusableImage();
+  });
+  elements.updateAppButton.addEventListener("click", async () => {
+    setControlPanelOpen(false);
+    await updateApp();
+  });
   elements.themeToggleButton.addEventListener("click", toggleTheme);
   elements.mzDisplayModeButton.addEventListener("click", () => {
     toggleMzDisplayMode();
@@ -197,7 +210,7 @@ function registerEventListeners() {
   });
   elements.addNoteButton.addEventListener("click", async () => {
     await createNoteInSelectedFolder();
-    closeControlPanelAfterAction();
+    setControlPanelOpen(false);
   });
   elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
   elements.screenBackButton.addEventListener("click", handleScreenBack);
@@ -214,7 +227,7 @@ function registerEventListeners() {
   elements.addTextBlockButton.addEventListener("click", addTextBlock);
   elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
-  elements.addReusableImageBlockButton.addEventListener("click", () => openReusableImageModal());
+  elements.addReusableImageBlockButton.addEventListener("click", openReusableImageModal);
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
   elements.scrollToLastBlockButton.addEventListener("click", scrollToLastBlock);
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
@@ -255,9 +268,6 @@ function registerEventListeners() {
       closeReusableImageModal();
     }
   });
-  window.addEventListener("memo:openReusableImages", (event) => {
-    openReusableImageModal({ afterBlockId: event.detail?.afterBlockId || null });
-  });
 
   elements.noteTitleInput.addEventListener("input", () => {
     if (state.isLoadingEditor) return;
@@ -269,30 +279,14 @@ function registerEventListeners() {
   });
 }
 
-function registerControlPanelToggle() {
-  if (!elements.controlPanelToggle || !elements.controlPanel) return;
-
-  elements.controlPanelToggle.addEventListener("click", handleControlPanelToggle);
-}
-
-function handleControlPanelToggle(event) {
-  event.preventDefault();
-  event.stopPropagation();
-  setControlPanelOpen(!state.controlPanelOpen);
-}
-
 function initializeControlPanelState() {
-  state.controlPanelOpen = false;
-  localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
+  const saved = localStorage.getItem(CONTROL_PANEL_STORAGE_KEY);
+  state.controlPanelOpen = saved === "true";
   renderControlPanelState();
 }
 
 function toggleControlPanel() {
   setControlPanelOpen(!state.controlPanelOpen);
-}
-
-function closeControlPanelAfterAction() {
-  setControlPanelOpen(false);
 }
 
 function setControlPanelOpen(isOpen) {
@@ -302,8 +296,6 @@ function setControlPanelOpen(isOpen) {
 }
 
 function renderControlPanelState() {
-  if (!elements.controlPanel || !elements.controlPanelToggle) return;
-
   elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
   elements.controlPanelToggle.textContent = "⚙";
   elements.controlPanelToggle.setAttribute(

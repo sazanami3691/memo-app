@@ -1,19 +1,11 @@
 "use strict";
 
-import {
-  elements,
-  MZ_DISPLAY_MODE_STORAGE_KEY,
-  state,
-  THEME_STORAGE_KEY,
-  UI_STYLE_STORAGE_KEY
-} from "./state.js";
+import { elements, MZ_DISPLAY_MODE_STORAGE_KEY, state, THEME_STORAGE_KEY } from "./state.js";
 
 const LIGHT_THEME = "light";
 const DARK_THEME = "dark";
 const MZ_DISPLAY_NORMAL = "normal";
 const MZ_DISPLAY_WINDOW = "window";
-const UI_STYLE_NORMAL = "normal";
-const UI_STYLE_MZ = "mz";
 
 export function initializeTheme() {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -23,11 +15,6 @@ export function initializeTheme() {
 export function initializeMzDisplayMode() {
   const savedMode = localStorage.getItem(MZ_DISPLAY_MODE_STORAGE_KEY);
   applyMzDisplayMode(savedMode === MZ_DISPLAY_NORMAL ? MZ_DISPLAY_NORMAL : MZ_DISPLAY_WINDOW);
-}
-
-export function initializeUiStyle() {
-  const savedStyle = localStorage.getItem(UI_STYLE_STORAGE_KEY);
-  applyUiStyle(savedStyle === UI_STYLE_MZ ? UI_STYLE_MZ : UI_STYLE_NORMAL);
 }
 
 export function toggleTheme() {
@@ -40,12 +27,6 @@ export function toggleMzDisplayMode() {
   const nextMode = state.mzDisplayMode === MZ_DISPLAY_WINDOW ? MZ_DISPLAY_NORMAL : MZ_DISPLAY_WINDOW;
   localStorage.setItem(MZ_DISPLAY_MODE_STORAGE_KEY, nextMode);
   applyMzDisplayMode(nextMode);
-}
-
-export function toggleUiStyle() {
-  const nextStyle = state.uiStyle === UI_STYLE_MZ ? UI_STYLE_NORMAL : UI_STYLE_MZ;
-  localStorage.setItem(UI_STYLE_STORAGE_KEY, nextStyle);
-  applyUiStyle(nextStyle);
 }
 
 export function renderThemeButton() {
@@ -62,14 +43,6 @@ export function renderMzDisplayModeButton() {
   elements.mzDisplayModeButton.textContent = state.mzDisplayMode === MZ_DISPLAY_WINDOW
     ? "MZ表示を通常にする"
     : "MZ表示をウィンドウにする";
-}
-
-export function renderUiStyleButton() {
-  if (!elements.mzUiModeButton) return;
-
-  elements.mzUiModeButton.textContent = state.uiStyle === UI_STYLE_MZ
-    ? "MZ風UIを解除する"
-    : "MZ風UIを有効にする";
 }
 
 export async function updateApp() {
@@ -101,12 +74,6 @@ function applyTheme(theme) {
 function applyMzDisplayMode(mode) {
   state.mzDisplayMode = mode;
   renderMzDisplayModeButton();
-}
-
-function applyUiStyle(style) {
-  state.uiStyle = style;
-  document.body.classList.toggle("mz-ui-theme", style === UI_STYLE_MZ);
-  renderUiStyleButton();
 }
 
 async function clearAppCachesIfAvailable() {

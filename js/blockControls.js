@@ -45,16 +45,11 @@ export function createBlockInsertActions(blockId, handlers) {
   addImageButton.textContent = "下に画像追加";
   addImageButton.addEventListener("click", () => handlers.insertImageBlockAfter(blockId));
 
-  const addReusableImageButton = document.createElement("button");
-  addReusableImageButton.type = "button";
-  addReusableImageButton.textContent = "下に登録画像追加";
-  addReusableImageButton.addEventListener("click", () => handlers.insertReusableImageBlockAfter(blockId));
-
   const addDrawingButton = document.createElement("button");
   addDrawingButton.type = "button";
   addDrawingButton.textContent = "下に手書き追加";
   addDrawingButton.addEventListener("click", () => handlers.insertDrawingBlockAfter(blockId));
 
-  actions.append(addTextButton, addMzMessageButton, addImageButton, addReusableImageButton, addDrawingButton);
+  actions.append(addTextButton, addMzMessageButton, addImageButton, addDrawingButton);
   return actions;
 }
