@@ -174,45 +174,29 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  registerControlPanelToggle();
   setupImageCropModal();
-  elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
-  elements.openSearchButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    openSearchView();
-  });
+  elements.openSearchButton.addEventListener("click", () => runMenuAction(openSearchView));
   elements.searchInput.addEventListener("input", handleSearchInput);
-  elements.addParentFolderButton.addEventListener("click", createParentFolder);
-  elements.addChildFolderButton.addEventListener("click", createChildFolder);
-  elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
-  elements.deleteFolderButton.addEventListener("click", deleteSelectedFolder);
-  elements.exportBackupButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    exportBackup();
-  });
-  elements.importBackupButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
+  elements.addParentFolderButton.addEventListener("click", () => runMenuAction(createParentFolder));
+  elements.addChildFolderButton.addEventListener("click", () => runMenuAction(createChildFolder));
+  elements.renameFolderButton.addEventListener("click", () => runMenuAction(renameSelectedFolder));
+  elements.deleteFolderButton.addEventListener("click", () => runMenuAction(deleteSelectedFolder));
+  elements.exportBackupButton.addEventListener("click", () => runMenuAction(exportBackup));
+  elements.importBackupButton.addEventListener("click", () => runMenuAction(() => {
     elements.backupFileInput.value = "";
     elements.backupFileInput.click();
-  });
+  }));
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
-  elements.registerReusableImageButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    registerReusableImage();
-  });
-  elements.updateAppButton.addEventListener("click", async () => {
-    setControlPanelOpen(false);
-    await updateApp();
-  });
-  elements.themeToggleButton.addEventListener("click", toggleTheme);
-  elements.mzDisplayModeButton.addEventListener("click", () => {
+  elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
+  elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
+  elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
+  elements.mzDisplayModeButton.addEventListener("click", () => runMenuAction(() => {
     toggleMzDisplayMode();
     renderEditor();
-  });
-  elements.addNoteButton.addEventListener("click", async () => {
-    await createNoteInSelectedFolder();
-    setControlPanelOpen(false);
-  });
-  elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
+  }));
+  elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
+  elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
   elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
   elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
@@ -268,6 +252,11 @@ function registerEventListeners() {
       closeReusableImageModal();
     }
   });
+  window.addEventListener("memo:openReusableImages", (event) => {
+    openReusableImageModal({
+      afterBlockId: event.detail?.afterBlockId || null
+    });
+  });
 
   elements.noteTitleInput.addEventListener("input", () => {
     if (state.isLoadingEditor) return;
@@ -279,14 +268,43 @@ function registerEventListeners() {
   });
 }
 
+function registerControlPanelToggle() {
+  if (!elements.controlPanelToggle || !elements.controlPanel) return;
+  elements.controlPanelToggle.addEventListener("click", handleControlPanelToggle);
+}
+
+function handleControlPanelToggle(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  setControlPanelOpen(!state.controlPanelOpen);
+}
+
 function initializeControlPanelState() {
-  const saved = localStorage.getItem(CONTROL_PANEL_STORAGE_KEY);
-  state.controlPanelOpen = saved === "true";
+  state.controlPanelOpen = false;
+  localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
   renderControlPanelState();
 }
 
 function toggleControlPanel() {
   setControlPanelOpen(!state.controlPanelOpen);
+}
+
+function runMenuAction(action) {
+  try {
+    const result = action();
+    if (result && typeof result.finally === "function") {
+      return result.finally(closeControlPanelAfterAction);
+    }
+    closeControlPanelAfterAction();
+    return result;
+  } catch (error) {
+    closeControlPanelAfterAction();
+    throw error;
+  }
+}
+
+function closeControlPanelAfterAction() {
+  setControlPanelOpen(false);
 }
 
 function setControlPanelOpen(isOpen) {
@@ -296,6 +314,7 @@ function setControlPanelOpen(isOpen) {
 }
 
 function renderControlPanelState() {
+  if (!elements.controlPanel || !elements.controlPanelToggle) return;
   elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
   elements.controlPanelToggle.textContent = "⚙";
   elements.controlPanelToggle.setAttribute(
