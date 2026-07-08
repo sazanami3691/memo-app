@@ -176,46 +176,33 @@ function collectElements() {
 function registerEventListeners() {
   setupImageCropModal();
   elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
-  elements.openSearchButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    openSearchView();
-  });
+  elements.openSearchButton.addEventListener("click", () => runControlPanelAction(openSearchView));
   elements.searchInput.addEventListener("input", handleSearchInput);
-  elements.addParentFolderButton.addEventListener("click", createParentFolder);
-  elements.addChildFolderButton.addEventListener("click", createChildFolder);
-  elements.renameFolderButton.addEventListener("click", renameSelectedFolder);
-  elements.deleteFolderButton.addEventListener("click", deleteSelectedFolder);
-  elements.exportBackupButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    exportBackup();
-  });
-  elements.importBackupButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
+  elements.addParentFolderButton.addEventListener("click", () => runControlPanelAction(createParentFolder));
+  elements.addChildFolderButton.addEventListener("click", () => runControlPanelAction(createChildFolder));
+  elements.renameFolderButton.addEventListener("click", () => runControlPanelAction(renameSelectedFolder));
+  elements.deleteFolderButton.addEventListener("click", () => runControlPanelAction(deleteSelectedFolder));
+  elements.exportBackupButton.addEventListener("click", () => runControlPanelAction(exportBackup));
+  elements.importBackupButton.addEventListener("click", () => runControlPanelAction(() => {
     elements.backupFileInput.value = "";
     elements.backupFileInput.click();
-  });
+  }));
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
-  elements.registerReusableImageButton.addEventListener("click", () => {
-    setControlPanelOpen(false);
-    registerReusableImage();
-  });
-  elements.updateAppButton.addEventListener("click", async () => {
-    setControlPanelOpen(false);
-    await updateApp();
-  });
-  elements.themeToggleButton.addEventListener("click", toggleTheme);
-  elements.mzDisplayModeButton.addEventListener("click", () => {
+  elements.registerReusableImageButton.addEventListener("click", () => runControlPanelAction(registerReusableImage));
+  elements.updateAppButton.addEventListener("click", () => runControlPanelAction(updateApp));
+  elements.themeToggleButton.addEventListener("click", () => runControlPanelAction(toggleTheme));
+  elements.mzDisplayModeButton.addEventListener("click", () => runControlPanelAction(() => {
     toggleMzDisplayMode();
     renderEditor();
-  });
+  }));
   elements.addNoteButton.addEventListener("click", async () => {
     await createNoteInSelectedFolder();
-    setControlPanelOpen(false);
+    closeControlPanelAfterAction();
   });
-  elements.deleteSelectedNoteButton.addEventListener("click", deleteSelectedNote);
+  elements.deleteSelectedNoteButton.addEventListener("click", () => runControlPanelAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
-  elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
-  elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
+  elements.togglePinButton.addEventListener("click", () => runControlPanelAction(toggleSelectedNotePin));
+  elements.moveNoteButton.addEventListener("click", () => runControlPanelAction(openMoveNoteModal));
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
     renderEditor();
@@ -227,7 +214,7 @@ function registerEventListeners() {
   elements.addTextBlockButton.addEventListener("click", addTextBlock);
   elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
   elements.addImageBlockButton.addEventListener("click", addImageBlock);
-  elements.addReusableImageBlockButton.addEventListener("click", openReusableImageModal);
+  elements.addReusableImageBlockButton.addEventListener("click", () => openReusableImageModal());
   elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
   elements.scrollToLastBlockButton.addEventListener("click", scrollToLastBlock);
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
@@ -268,6 +255,9 @@ function registerEventListeners() {
       closeReusableImageModal();
     }
   });
+  window.addEventListener("memo:openReusableImages", (event) => {
+    openReusableImageModal({ afterBlockId: event.detail?.afterBlockId || null });
+  });
 
   elements.noteTitleInput.addEventListener("input", () => {
     if (state.isLoadingEditor) return;
@@ -287,6 +277,15 @@ function initializeControlPanelState() {
 
 function toggleControlPanel() {
   setControlPanelOpen(!state.controlPanelOpen);
+}
+
+function closeControlPanelAfterAction() {
+  setControlPanelOpen(false);
+}
+
+function runControlPanelAction(action) {
+  closeControlPanelAfterAction();
+  return action();
 }
 
 function setControlPanelOpen(isOpen) {

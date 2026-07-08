@@ -12,7 +12,6 @@ export const BACKUP_VERSION = 1;
 export const CONTROL_PANEL_STORAGE_KEY = "memoAppControlPanelOpen";
 export const THEME_STORAGE_KEY = "memoAppTheme";
 export const MZ_DISPLAY_MODE_STORAGE_KEY = "memoAppMzDisplayMode";
-export const UI_STYLE_STORAGE_KEY = "memoAppUiStyle";
 
 export const IMAGE_MAX_SIZE = 1200;
 export const IMAGE_JPEG_QUALITY = 0.82;
@@ -38,7 +37,6 @@ export const state = {
   editorMode: "preview",
   theme: "light",
   mzDisplayMode: "window",
-  uiStyle: "normal",
   controlPanelOpen: false,
   folderNavLevel: "parents",
   activeParentFolderId: null,
@@ -49,6 +47,7 @@ export const state = {
   autoSaveTimer: null,
   isLoadingEditor: false,
   pendingImageInsertAfterBlockId: null,
+  pendingReusableImageInsertAfterBlockId: null,
   pendingDrawingInsertAfterBlockId: null,
   editingDrawingAssetId: null,
   drawingContext: null,
