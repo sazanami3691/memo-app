@@ -174,8 +174,8 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  registerControlPanelToggle();
   setupImageCropModal();
-  elements.controlPanelToggle.addEventListener("click", toggleControlPanel);
   elements.openSearchButton.addEventListener("click", () => runControlPanelAction(openSearchView));
   elements.searchInput.addEventListener("input", handleSearchInput);
   elements.addParentFolderButton.addEventListener("click", () => runControlPanelAction(createParentFolder));
@@ -269,6 +269,18 @@ function registerEventListeners() {
   });
 }
 
+function registerControlPanelToggle() {
+  if (!elements.controlPanelToggle || !elements.controlPanel) return;
+
+  elements.controlPanelToggle.addEventListener("click", handleControlPanelToggle);
+}
+
+function handleControlPanelToggle(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  setControlPanelOpen(!state.controlPanelOpen);
+}
+
 function initializeControlPanelState() {
   const saved = localStorage.getItem(CONTROL_PANEL_STORAGE_KEY);
   state.controlPanelOpen = saved === "true";
@@ -295,6 +307,8 @@ function setControlPanelOpen(isOpen) {
 }
 
 function renderControlPanelState() {
+  if (!elements.controlPanel || !elements.controlPanelToggle) return;
+
   elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
   elements.controlPanelToggle.textContent = "⚙";
   elements.controlPanelToggle.setAttribute(
