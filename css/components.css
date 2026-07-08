@@ -41,8 +41,15 @@
 }
 
 
-.control-panel.collapsed {
+.control-panel.collapsed,
+#controlPanel.collapsed {
   display: none;
+  pointer-events: none;
+}
+
+.control-panel:not(.collapsed),
+#controlPanel:not(.collapsed) {
+  pointer-events: auto;
 }
 
 .control-group {

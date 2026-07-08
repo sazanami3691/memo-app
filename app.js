@@ -282,8 +282,8 @@ function handleControlPanelToggle(event) {
 }
 
 function initializeControlPanelState() {
-  const saved = localStorage.getItem(CONTROL_PANEL_STORAGE_KEY);
-  state.controlPanelOpen = saved === "true";
+  state.controlPanelOpen = false;
+  localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
   renderControlPanelState();
 }
 
@@ -296,8 +296,17 @@ function closeControlPanelAfterAction() {
 }
 
 function runControlPanelAction(action) {
-  closeControlPanelAfterAction();
-  return action();
+  try {
+    const result = action();
+    if (result && typeof result.finally === "function") {
+      return result.finally(closeControlPanelAfterAction);
+    }
+    closeControlPanelAfterAction();
+    return result;
+  } catch (error) {
+    closeControlPanelAfterAction();
+    throw error;
+  }
 }
 
 function setControlPanelOpen(isOpen) {
