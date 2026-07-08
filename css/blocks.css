@@ -120,10 +120,7 @@
 }
 
 .block-insert-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
+  display: none;
 }
 
 .block-insert-actions button {

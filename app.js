@@ -102,6 +102,8 @@ function collectElements() {
   elements.selectedFolderName = document.getElementById("selectedFolderName");
   elements.screenBackButton = document.getElementById("screenBackButton");
   elements.screenHeaderTitle = document.getElementById("screenHeaderTitle");
+  elements.addPanelToggle = document.getElementById("addPanelToggle");
+  elements.addPanel = document.getElementById("addPanel");
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
   elements.openSearchButton = document.getElementById("openSearchButton");
@@ -174,6 +176,7 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  registerAddPanelToggle();
   registerControlPanelToggle();
   setupImageCropModal();
   elements.openSearchButton.addEventListener("click", () => runMenuAction(openSearchView));
@@ -208,12 +211,12 @@ function registerEventListeners() {
     state.editorMode = "edit";
     renderEditor();
   });
-  elements.addTextBlockButton.addEventListener("click", addTextBlock);
-  elements.addMzMessageBlockButton.addEventListener("click", addMzMessageBlock);
-  elements.addImageBlockButton.addEventListener("click", addImageBlock);
-  elements.addReusableImageBlockButton.addEventListener("click", openReusableImageModal);
-  elements.addDrawingBlockButton.addEventListener("click", addDrawingBlock);
-  elements.scrollToLastBlockButton.addEventListener("click", scrollToLastBlock);
+  elements.addTextBlockButton.addEventListener("click", () => runAddMenuAction(addTextBlock));
+  elements.addMzMessageBlockButton.addEventListener("click", () => runAddMenuAction(addMzMessageBlock));
+  elements.addImageBlockButton.addEventListener("click", () => runAddMenuAction(addImageBlock));
+  elements.addReusableImageBlockButton.addEventListener("click", () => runAddMenuAction(openReusableImageModal));
+  elements.addDrawingBlockButton.addEventListener("click", () => runAddMenuAction(addDrawingBlock));
+  elements.scrollToLastBlockButton.addEventListener("click", () => runAddMenuAction(scrollToLastBlock));
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
   elements.reusableImageFileInput.addEventListener("change", handleReusableImageFileSelected);
   elements.imageModalClose.addEventListener("click", closeImageModal);
@@ -268,6 +271,17 @@ function registerEventListeners() {
   });
 }
 
+function registerAddPanelToggle() {
+  if (!elements.addPanelToggle || !elements.addPanel) return;
+  elements.addPanelToggle.addEventListener("click", handleAddPanelToggle);
+}
+
+function handleAddPanelToggle(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  setAddPanelOpen(!state.addPanelOpen);
+}
+
 function registerControlPanelToggle() {
   if (!elements.controlPanelToggle || !elements.controlPanel) return;
   elements.controlPanelToggle.addEventListener("click", handleControlPanelToggle);
@@ -281,8 +295,10 @@ function handleControlPanelToggle(event) {
 
 function initializeControlPanelState() {
   state.controlPanelOpen = false;
+  state.addPanelOpen = false;
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
   renderControlPanelState();
+  renderAddPanelState();
 }
 
 function toggleControlPanel() {
@@ -303,14 +319,46 @@ function runMenuAction(action) {
   }
 }
 
+function runAddMenuAction(action) {
+  try {
+    const result = action();
+    if (result && typeof result.finally === "function") {
+      return result.finally(closeAddPanelAfterAction);
+    }
+    closeAddPanelAfterAction();
+    return result;
+  } catch (error) {
+    closeAddPanelAfterAction();
+    throw error;
+  }
+}
+
 function closeControlPanelAfterAction() {
   setControlPanelOpen(false);
 }
 
+function closeAddPanelAfterAction() {
+  setAddPanelOpen(false);
+}
+
 function setControlPanelOpen(isOpen) {
   state.controlPanelOpen = isOpen;
+  if (isOpen) {
+    state.addPanelOpen = false;
+    renderAddPanelState();
+  }
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, isOpen ? "true" : "false");
   renderControlPanelState();
+}
+
+function setAddPanelOpen(isOpen) {
+  state.addPanelOpen = isOpen;
+  if (isOpen) {
+    state.controlPanelOpen = false;
+    localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
+    renderControlPanelState();
+  }
+  renderAddPanelState();
 }
 
 function renderControlPanelState() {
@@ -322,6 +370,17 @@ function renderControlPanelState() {
     state.controlPanelOpen ? "操作メニューを閉じる" : "操作メニューを開く"
   );
   elements.controlPanelToggle.setAttribute("aria-expanded", state.controlPanelOpen ? "true" : "false");
+}
+
+function renderAddPanelState() {
+  if (!elements.addPanel || !elements.addPanelToggle) return;
+  elements.addPanel.classList.toggle("collapsed", !state.addPanelOpen);
+  elements.addPanelToggle.textContent = "＋";
+  elements.addPanelToggle.setAttribute(
+    "aria-label",
+    state.addPanelOpen ? "追加メニューを閉じる" : "追加メニューを開く"
+  );
+  elements.addPanelToggle.setAttribute("aria-expanded", state.addPanelOpen ? "true" : "false");
 }
 
 function renderAll() {
