@@ -47,6 +47,7 @@ export const state = {
   autoSaveTimer: null,
   isLoadingEditor: false,
   pendingImageInsertAfterBlockId: null,
+  pendingReusableImageInsertAfterBlockId: null,
   pendingDrawingInsertAfterBlockId: null,
   editingDrawingAssetId: null,
   drawingContext: null,

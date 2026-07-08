@@ -20,6 +20,7 @@ const blockHandlers = {
   insertTextBlockAfter,
   insertMzMessageBlockAfter,
   insertImageBlockAfter,
+  insertReusableImageBlockAfter,
   insertDrawingBlockAfter
 };
 
@@ -120,6 +121,12 @@ export function insertMzMessageBlockAfter(blockId) {
   note.blocks.splice(insertIndex, 0, createMzMessageBlock(""));
   renderBlockList(note);
   scheduleAutoSave();
+}
+
+export function insertReusableImageBlockAfter(blockId) {
+  window.dispatchEvent(new CustomEvent("memo:openReusableImages", {
+    detail: { afterBlockId: blockId }
+  }));
 }
 
 export function insertBlock(block, afterBlockId) {
