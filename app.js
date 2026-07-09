@@ -75,6 +75,10 @@ import {
   state
 } from "./js/state.js";
 
+const MENU_TOGGLE_GUARD_MS = 300;
+let lastAddPanelToggleAt = 0;
+let lastControlPanelToggleAt = 0;
+
 document.addEventListener("DOMContentLoaded", initializeApp);
 
 async function initializeApp() {
@@ -255,6 +259,8 @@ function registerEventListeners() {
       closeReusableImageModal();
     }
   });
+  document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
+  document.addEventListener("click", handleDocumentClick);
   window.addEventListener("memo:openReusableImages", (event) => {
     openReusableImageModal({
       afterBlockId: event.detail?.afterBlockId || null
@@ -284,13 +290,49 @@ function handleAddPanelToggle(event) {
 
 function registerControlPanelToggle() {
   if (!elements.controlPanelToggle || !elements.controlPanel) return;
+  elements.controlPanelToggle.addEventListener("pointerup", handleControlPanelToggle, { passive: false });
   elements.controlPanelToggle.addEventListener("click", handleControlPanelToggle);
 }
 
 function handleControlPanelToggle(event) {
   event.preventDefault();
   event.stopPropagation();
+  const now = Date.now();
+  if (now - lastControlPanelToggleAt < MENU_TOGGLE_GUARD_MS) return;
+  lastControlPanelToggleAt = now;
   setControlPanelOpen(!state.controlPanelOpen);
+}
+
+function handleDocumentPointerUp(event) {
+  closeMenusFromOutsideEvent(event);
+}
+
+function handleDocumentClick(event) {
+  closeMenusFromOutsideEvent(event);
+}
+
+function closeMenusFromOutsideEvent(event) {
+  if (!state.addPanelOpen && !state.controlPanelOpen) return;
+  if (isInsideHeaderMenu(event.target)) return;
+
+  if (state.addPanelOpen) {
+    setAddPanelOpen(false);
+  }
+  if (state.controlPanelOpen) {
+    setControlPanelOpen(false);
+  }
+}
+
+function isInsideHeaderMenu(target) {
+  return Boolean(
+    target &&
+    (
+      elements.addPanelToggle?.contains(target) ||
+      elements.addPanel?.contains(target) ||
+      elements.controlPanelToggle?.contains(target) ||
+      elements.controlPanel?.contains(target)
+    )
+  );
 }
 
 function initializeControlPanelState() {

@@ -13,6 +13,7 @@
   line-height: 1;
   pointer-events: auto;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .control-panel-toggle {
@@ -344,6 +345,7 @@
   line-height: 1;
   pointer-events: auto;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .add-panel {
@@ -359,6 +361,11 @@
   background: var(--panel);
   box-shadow: var(--shadow);
   padding: 10px;
+}
+
+.control-panel,
+.add-panel {
+  touch-action: manipulation;
 }
 
 .control-panel.collapsed,
