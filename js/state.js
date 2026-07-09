@@ -38,6 +38,7 @@ export const state = {
   theme: "light",
   mzDisplayMode: "window",
   controlPanelOpen: false,
+  addPanelOpen: false,
   folderNavLevel: "parents",
   activeParentFolderId: null,
   activeChildFolderId: null,

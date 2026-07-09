@@ -279,16 +279,12 @@ function registerEventListeners() {
 
 function registerAddPanelToggle() {
   if (!elements.addPanelToggle || !elements.addPanel) return;
-  elements.addPanelToggle.addEventListener("pointerup", handleAddPanelToggle, { passive: false });
   elements.addPanelToggle.addEventListener("click", handleAddPanelToggle);
 }
 
 function handleAddPanelToggle(event) {
   event.preventDefault();
   event.stopPropagation();
-  const now = Date.now();
-  if (now - lastAddPanelToggleAt < MENU_TOGGLE_GUARD_MS) return;
-  lastAddPanelToggleAt = now;
   setAddPanelOpen(!state.addPanelOpen);
 }
 

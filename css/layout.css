@@ -10,7 +10,7 @@
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 100;
   margin-bottom: 10px;
   padding: 8px 0 10px;
   background: var(--bg);
