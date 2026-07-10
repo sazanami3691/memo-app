@@ -1,6 +1,6 @@
 "use strict";
 
-import { createBlockControls, createBlockInsertActions, insertBlock } from "./blocks.js";
+import { createBlockControls, createBlockInsertActions, getViewportCenterBlockId, insertBlock } from "./blocks.js";
 import { createMissingAssetMessage, getAssetById } from "./assets.js";
 import { saveAsset } from "./db.js";
 import { openImageModal } from "./imageBlocks.js";
@@ -25,10 +25,12 @@ export function createDrawingBlock(assetId) {
 }
 
 export function addDrawingBlock() {
-  state.pendingDrawingInsertAfterBlockId = null;
+  const afterBlockId = getViewportCenterBlockId();
+  state.pendingDrawingInsertAfterBlockId = afterBlockId;
+  state.editorMode = "edit";
   openDrawingModal({
     assetId: null,
-    afterBlockId: null
+    afterBlockId
   });
 }
 

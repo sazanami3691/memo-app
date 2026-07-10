@@ -1,6 +1,6 @@
 "use strict";
 
-import { createBlockControls, createBlockInsertActions, insertBlock } from "./blocks.js";
+import { createBlockControls, createBlockInsertActions, getViewportCenterBlockId, insertBlock } from "./blocks.js";
 import { createMissingAssetMessage, getAssetById } from "./assets.js";
 import { openImageCropModal } from "./cropImage.js";
 import { saveAsset } from "./db.js";
@@ -18,7 +18,8 @@ export function createImageBlock(assetId) {
 }
 
 export function addImageBlock() {
-  state.pendingImageInsertAfterBlockId = null;
+  state.pendingImageInsertAfterBlockId = getViewportCenterBlockId();
+  state.editorMode = "edit";
   openImagePicker();
 }
 
