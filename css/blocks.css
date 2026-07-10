@@ -119,6 +119,27 @@
   padding: 6px 10px;
 }
 
+.block-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.block-card.is-dragging {
+  opacity: 0.55;
+}
+
+.block-drop-indicator {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--accent);
+  margin: 8px 0;
+}
+
+.block-drag-active {
+  user-select: none;
+}
+
 .block-insert-actions {
   display: none;
 }

@@ -4,6 +4,13 @@ export function createBlockControls(block, index, blockCount, handlers) {
   const controls = document.createElement("div");
   controls.className = "block-controls";
 
+  const dragHandle = document.createElement("button");
+  dragHandle.type = "button";
+  dragHandle.className = "block-drag-handle";
+  dragHandle.textContent = "↕ 移動";
+  dragHandle.setAttribute("aria-label", "ブロックを移動");
+  dragHandle.addEventListener("pointerdown", (event) => handlers.startBlockDrag(block.id, event));
+
   const upButton = document.createElement("button");
   upButton.type = "button";
   upButton.textContent = "上へ";
@@ -22,7 +29,7 @@ export function createBlockControls(block, index, blockCount, handlers) {
   deleteButton.textContent = "削除";
   deleteButton.addEventListener("click", () => handlers.deleteBlock(block.id));
 
-  controls.append(upButton, downButton, deleteButton);
+  controls.append(dragHandle, upButton, downButton, deleteButton);
   return controls;
 }
 

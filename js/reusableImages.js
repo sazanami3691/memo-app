@@ -4,7 +4,7 @@ import {
   getReusableAssetName,
   getReusableImageAssets
 } from "./assets.js";
-import { insertBlock } from "./blocks.js";
+import { getViewportCenterBlockId, insertBlock } from "./blocks.js";
 import { openImageCropModal } from "./cropImage.js";
 import { saveAsset } from "./db.js";
 import {
@@ -67,7 +67,9 @@ export async function handleReusableImageFileSelected() {
 }
 
 export function openReusableImageModal(options = {}) {
-  state.pendingReusableImageInsertAfterBlockId = options.afterBlockId || null;
+  state.pendingReusableImageInsertAfterBlockId = Object.prototype.hasOwnProperty.call(options, "afterBlockId")
+    ? options.afterBlockId
+    : getViewportCenterBlockId();
   renderReusableImageList();
   elements.reusableImageModal.classList.remove("hidden");
   elements.reusableImageModal.setAttribute("aria-hidden", "false");

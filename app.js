@@ -279,12 +279,16 @@ function registerEventListeners() {
 
 function registerAddPanelToggle() {
   if (!elements.addPanelToggle || !elements.addPanel) return;
+  elements.addPanelToggle.addEventListener("pointerup", handleAddPanelToggle, { passive: false });
   elements.addPanelToggle.addEventListener("click", handleAddPanelToggle);
 }
 
 function handleAddPanelToggle(event) {
   event.preventDefault();
   event.stopPropagation();
+  const now = Date.now();
+  if (now - lastAddPanelToggleAt < MENU_TOGGLE_GUARD_MS) return;
+  lastAddPanelToggleAt = now;
   setAddPanelOpen(!state.addPanelOpen);
 }
 
@@ -438,9 +442,22 @@ function renderAll() {
 }
 
 function scrollToLastBlock() {
+  if (state.editorMode === "preview" && !elements.previewArea.classList.contains("hidden")) {
+    const previewContent = elements.previewArea.querySelector(".preview-content");
+    const lastPreviewBlock = previewContent?.lastElementChild || elements.previewArea.lastElementChild;
+    if (lastPreviewBlock) {
+      lastPreviewBlock.scrollIntoView({ behavior: "smooth", block: "end" });
+      return;
+    }
+  }
+
   const lastBlock = elements.blockList.lastElementChild;
-  if (!lastBlock) return;
-  lastBlock.scrollIntoView({ behavior: "smooth", block: "end" });
+  if (lastBlock) {
+    lastBlock.scrollIntoView({ behavior: "smooth", block: "end" });
+    return;
+  }
+
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
 }
 
 function renderAppView() {
