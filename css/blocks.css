@@ -27,6 +27,35 @@
   overflow-wrap: anywhere;
 }
 
+.preview-block {
+  display: grid;
+  gap: 8px;
+}
+
+.preview-block-menu {
+  justify-self: start;
+}
+
+.preview-block-menu summary {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  list-style-position: inside;
+  padding: 6px 10px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.preview-block-menu button {
+  display: block;
+  min-height: 40px;
+  margin-top: 8px;
+  padding: 6px 10px;
+}
+
 .preview-image-wrap,
 .preview-drawing-wrap {
   margin: 4px 0;

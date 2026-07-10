@@ -46,9 +46,7 @@ import {
 import {
   initializeMzDisplayMode,
   initializeTheme,
-  renderMzDisplayModeButton,
   renderThemeButton,
-  toggleMzDisplayMode,
   toggleTheme,
   updateApp
 } from "./js/options.js";
@@ -122,7 +120,6 @@ function collectElements() {
   elements.registerReusableImageButton = document.getElementById("registerReusableImageButton");
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
-  elements.mzDisplayModeButton = document.getElementById("mzDisplayModeButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -198,10 +195,6 @@ function registerEventListeners() {
   elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
-  elements.mzDisplayModeButton.addEventListener("click", () => runMenuAction(() => {
-    toggleMzDisplayMode();
-    renderEditor();
-  }));
   elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
@@ -436,7 +429,6 @@ function renderAll() {
   renderEditor();
   updateActionButtons();
   renderThemeButton();
-  renderMzDisplayModeButton();
   renderAppView();
   renderScreenHeader();
 }

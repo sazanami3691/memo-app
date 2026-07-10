@@ -25,6 +25,7 @@ const blockHandlers = {
   moveBlockDown,
   deleteBlock,
   startBlockDrag,
+  convertTextBlockToMzMessage,
   insertTextBlockAfter,
   insertMzMessageBlockAfter,
   insertImageBlockAfter,
@@ -68,7 +69,7 @@ export function renderBlock(block, index, blockCount) {
 
 export function renderPreviewBlock(block) {
   if (block.type === "text") {
-    return renderPreviewTextBlock(block);
+    return renderPreviewTextBlockWithMenu(block);
   }
 
   if (block.type === "mzMessage") {
@@ -332,6 +333,22 @@ function applyBlockDragDrop() {
   scheduleAutoSave();
 }
 
+export async function convertTextBlockToMzMessage(blockId) {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  const block = note.blocks.find((item) => item.id === blockId);
+  if (!block || block.type !== "text") return;
+
+  block.type = "mzMessage";
+  if (typeof block.speakerName !== "string") {
+    block.speakerName = "";
+  }
+
+  await saveCurrentNote(note.id);
+  appActions.renderAll();
+}
+
 function updateBlockDropIndicator(clientY) {
   if (!blockDragState?.indicator) return;
 
@@ -389,6 +406,30 @@ function getEditableBlockElements() {
 
 function getBlockElementById(blockId) {
   return getEditableBlockElements().find((element) => element.dataset.blockId === blockId) || null;
+}
+
+function renderPreviewTextBlockWithMenu(block) {
+  const wrapper = document.createElement("section");
+  wrapper.className = "preview-block preview-text-block";
+  wrapper.dataset.blockId = block.id;
+
+  const menu = document.createElement("details");
+  menu.className = "preview-block-menu";
+
+  const summary = document.createElement("summary");
+  summary.textContent = "ブロックメニュー";
+
+  const convertButton = document.createElement("button");
+  convertButton.type = "button";
+  convertButton.textContent = "MZブロック表示にする";
+  convertButton.addEventListener("click", () => {
+    menu.open = false;
+    convertTextBlockToMzMessage(block.id);
+  });
+
+  menu.append(summary, convertButton);
+  wrapper.append(renderPreviewTextBlock(block), menu);
+  return wrapper;
 }
 
 function updateBlockDragAutoScroll(clientY) {
