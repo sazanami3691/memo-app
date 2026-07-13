@@ -12,6 +12,7 @@ export const BACKUP_VERSION = 1;
 export const CONTROL_PANEL_STORAGE_KEY = "memoAppControlPanelOpen";
 export const THEME_STORAGE_KEY = "memoAppTheme";
 export const MZ_DISPLAY_MODE_STORAGE_KEY = "memoAppMzDisplayMode";
+export const MZ_TEXT_PREVIEW_STORAGE_KEY = "memoAppMzTextPreviewNotes";
 
 export const IMAGE_MAX_SIZE = 1200;
 export const IMAGE_JPEG_QUALITY = 0.82;
@@ -37,6 +38,7 @@ export const state = {
   editorMode: "preview",
   theme: "light",
   mzDisplayMode: "window",
+  mzTextPreviewNoteIds: new Set(),
   controlPanelOpen: false,
   addPanelOpen: false,
   folderNavLevel: "parents",

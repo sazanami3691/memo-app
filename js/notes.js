@@ -285,6 +285,7 @@ export function updateActionButtons() {
   elements.addReusableImageBlockButton.disabled = !hasNote;
   elements.addDrawingBlockButton.disabled = !hasNote;
   elements.scrollToLastBlockButton.disabled = !hasNote;
+  elements.mzTextPreviewToggleButton.disabled = !hasNote;
 }
 
 function canCreateNoteInCurrentView(selectedFolder) {

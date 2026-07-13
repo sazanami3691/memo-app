@@ -46,7 +46,9 @@ import {
 import {
   initializeMzDisplayMode,
   initializeTheme,
+  renderMzTextPreviewButton,
   renderThemeButton,
+  toggleSelectedNoteMzTextPreview,
   toggleTheme,
   updateApp
 } from "./js/options.js";
@@ -120,6 +122,7 @@ function collectElements() {
   elements.registerReusableImageButton = document.getElementById("registerReusableImageButton");
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
+  elements.mzTextPreviewToggleButton = document.getElementById("mzTextPreviewToggleButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -195,6 +198,7 @@ function registerEventListeners() {
   elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
+  elements.mzTextPreviewToggleButton.addEventListener("click", () => runMenuAction(toggleSelectedNoteMzTextPreview));
   elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
@@ -429,6 +433,7 @@ function renderAll() {
   renderEditor();
   updateActionButtons();
   renderThemeButton();
+  renderMzTextPreviewButton();
   renderAppView();
   renderScreenHeader();
 }

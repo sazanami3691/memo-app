@@ -1,6 +1,6 @@
 "use strict";
 
-import { elements, state, THEME_STORAGE_KEY } from "./state.js";
+import { appActions, elements, MZ_TEXT_PREVIEW_STORAGE_KEY, state, THEME_STORAGE_KEY } from "./state.js";
 
 const LIGHT_THEME = "light";
 const DARK_THEME = "dark";
@@ -13,6 +13,7 @@ export function initializeTheme() {
 
 export function initializeMzDisplayMode() {
   applyMzDisplayMode(MZ_DISPLAY_WINDOW);
+  loadMzTextPreviewSettings();
 }
 
 export function toggleTheme() {
@@ -27,6 +28,29 @@ export function renderThemeButton() {
   elements.themeToggleButton.textContent = state.theme === DARK_THEME
     ? "ライトテーマに切替"
     : "ダークテーマに切替";
+}
+
+export function toggleSelectedNoteMzTextPreview() {
+  if (!state.selectedNoteId) return;
+
+  if (state.mzTextPreviewNoteIds.has(state.selectedNoteId)) {
+    state.mzTextPreviewNoteIds.delete(state.selectedNoteId);
+  } else {
+    state.mzTextPreviewNoteIds.add(state.selectedNoteId);
+  }
+
+  saveMzTextPreviewSettings();
+  appActions.renderAll();
+}
+
+export function renderMzTextPreviewButton() {
+  if (!elements.mzTextPreviewToggleButton) return;
+
+  const hasSelectedNote = Boolean(state.selectedNoteId);
+  const isEnabled = hasSelectedNote && state.mzTextPreviewNoteIds.has(state.selectedNoteId);
+  elements.mzTextPreviewToggleButton.disabled = !hasSelectedNote;
+  elements.mzTextPreviewToggleButton.textContent = `通常ブロックをMZ表示: ${isEnabled ? "ON" : "OFF"}`;
+  elements.mzTextPreviewToggleButton.setAttribute("aria-pressed", isEnabled ? "true" : "false");
 }
 
 export async function updateApp() {
@@ -57,6 +81,31 @@ function applyTheme(theme) {
 
 function applyMzDisplayMode(mode) {
   state.mzDisplayMode = mode;
+}
+
+function loadMzTextPreviewSettings() {
+  state.mzTextPreviewNoteIds = new Set();
+
+  try {
+    const savedValue = localStorage.getItem(MZ_TEXT_PREVIEW_STORAGE_KEY);
+    const noteIds = JSON.parse(savedValue || "[]");
+    if (!Array.isArray(noteIds)) return;
+
+    noteIds.forEach((noteId) => {
+      if (typeof noteId === "string") {
+        state.mzTextPreviewNoteIds.add(noteId);
+      }
+    });
+  } catch (error) {
+    console.warn("MZ表示設定の読み込みに失敗しました。", error);
+  }
+}
+
+function saveMzTextPreviewSettings() {
+  localStorage.setItem(
+    MZ_TEXT_PREVIEW_STORAGE_KEY,
+    JSON.stringify(Array.from(state.mzTextPreviewNoteIds))
+  );
 }
 
 async function clearAppCachesIfAvailable() {
