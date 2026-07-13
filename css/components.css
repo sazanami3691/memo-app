@@ -32,6 +32,10 @@
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--shadow);
+  max-height: var(--control-panel-max-height, calc(100dvh - 92px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 10px;
 }
 
@@ -383,5 +387,9 @@
 .add-panel:not(.collapsed),
 #addPanel:not(.collapsed) {
   pointer-events: auto;
+}
+
+.control-panel:not(.collapsed) {
+  touch-action: pan-y;
 }
 
