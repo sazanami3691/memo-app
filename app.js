@@ -48,7 +48,7 @@ import {
   initializeTheme,
   renderMzTextPreviewButton,
   renderThemeButton,
-  toggleSelectedNoteMzTextPreview,
+  toggleGlobalMzTextPreview,
   toggleTheme,
   updateApp
 } from "./js/options.js";
@@ -199,7 +199,7 @@ function registerEventListeners() {
   elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
-  elements.mzTextPreviewToggleButton.addEventListener("click", () => runMenuAction(toggleSelectedNoteMzTextPreview));
+  elements.mzTextPreviewToggleButton.addEventListener("click", () => runMenuAction(toggleGlobalMzTextPreview));
   elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);

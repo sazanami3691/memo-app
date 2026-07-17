@@ -29,7 +29,17 @@ export function createBlockControls(block, index, blockCount, handlers) {
   deleteButton.textContent = "削除";
   deleteButton.addEventListener("click", () => handlers.deleteBlock(block.id));
 
-  controls.append(dragHandle, upButton, downButton, deleteButton);
+  controls.append(dragHandle, upButton, downButton);
+
+  if (block.type === "image" && typeof handlers.recropImageBlock === "function") {
+    const cropButton = document.createElement("button");
+    cropButton.type = "button";
+    cropButton.textContent = "トリミング";
+    cropButton.addEventListener("click", () => handlers.recropImageBlock(block.id));
+    controls.appendChild(cropButton);
+  }
+
+  controls.appendChild(deleteButton);
   return controls;
 }
 

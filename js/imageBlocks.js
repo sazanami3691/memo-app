@@ -1,10 +1,10 @@
 "use strict";
 
 import { createBlockControls, createBlockInsertActions, getViewportCenterBlockId, insertBlock } from "./blocks.js";
-import { createMissingAssetMessage, getAssetById } from "./assets.js";
+import { createMissingAssetMessage, deleteAssetIfUnused, getAssetById } from "./assets.js";
 import { openImageCropModal } from "./cropImage.js";
-import { saveAsset } from "./db.js";
-import { saveCurrentNote, scheduleAutoSave, setSaveStatus } from "./notes.js";
+import { deleteAsset, saveAsset, saveNote } from "./db.js";
+import { getSelectedNote, saveCurrentNote, scheduleAutoSave, setSaveStatus } from "./notes.js";
 import { appActions, elements, IMAGE_JPEG_QUALITY, IMAGE_MAX_SIZE, state } from "./state.js";
 import { createId } from "./utils.js";
 
@@ -71,14 +71,7 @@ export async function handleImageFileSelected() {
 
 export async function createImageAsset(file) {
   const dataUrl = await resizeImageFile(file);
-  const asset = {
-    id: createId("asset"),
-    type: "image",
-    dataUrl,
-    fileName: file.name || "image.jpg",
-    mimeType: "image/jpeg",
-    createdAt: Date.now()
-  };
+  const asset = createImageAssetObject(dataUrl, file.name || "image.jpg");
 
   await saveAsset(asset);
   state.assets.push(asset);
@@ -86,7 +79,15 @@ export async function createImageAsset(file) {
 }
 
 export async function createImageAssetFromDataUrl(dataUrl, fileName) {
-  const asset = {
+  const asset = createImageAssetObject(dataUrl, fileName);
+
+  await saveAsset(asset);
+  state.assets.push(asset);
+  return asset;
+}
+
+function createImageAssetObject(dataUrl, fileName) {
+  return {
     id: createId("asset"),
     type: "image",
     dataUrl,
@@ -94,10 +95,80 @@ export async function createImageAssetFromDataUrl(dataUrl, fileName) {
     mimeType: "image/jpeg",
     createdAt: Date.now()
   };
+}
 
-  await saveAsset(asset);
-  state.assets.push(asset);
-  return asset;
+export async function recropImageBlock(blockId) {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  const block = note.blocks.find((item) => item.id === blockId);
+  if (!block || block.type !== "image") return;
+
+  const originalAssetId = block.assetId;
+  const originalAsset = getAssetById(originalAssetId);
+  if (!originalAsset || !originalAsset.dataUrl) {
+    alert("この画像データが見つからないため、トリミングできません。");
+    return;
+  }
+
+  let newAsset = null;
+  const originalUpdatedAt = note.updatedAt;
+
+  try {
+    setSaveStatus("画像処理中...", "saving");
+    const cropResult = await openImageCropModal({
+      dataUrl: originalAsset.dataUrl,
+      fileName: originalAsset.fileName || "image.jpg"
+    });
+
+    if (!cropResult) {
+      setSaveStatus("保存済み");
+      return;
+    }
+
+    if (cropResult.useWholeImage) {
+      setSaveStatus("保存済み");
+      return;
+    }
+
+    newAsset = createImageAssetObject(
+      cropResult.dataUrl,
+      originalAsset.fileName || cropResult.fileName || "image.jpg"
+    );
+    await saveAsset(newAsset);
+    state.assets.push(newAsset);
+
+    block.assetId = newAsset.id;
+    note.updatedAt = Date.now();
+    await saveNote(note);
+  } catch (error) {
+    block.assetId = originalAssetId;
+    note.updatedAt = originalUpdatedAt;
+
+    if (newAsset) {
+      try {
+        await deleteAsset(newAsset.id);
+      } catch (deleteError) {
+        console.warn("作成途中の画像アセット削除に失敗しました。", deleteError);
+      }
+      state.assets = state.assets.filter((asset) => asset.id !== newAsset.id);
+    }
+
+    console.error(error);
+    alert("画像のトリミング保存に失敗しました。");
+    appActions.renderAll();
+    setSaveStatus("保存エラー", "error");
+    return;
+  }
+
+  try {
+    await deleteAssetIfUnused(originalAssetId, note.id, block.id);
+  } catch (error) {
+    console.warn("未使用画像アセットの削除に失敗しました。", error);
+  }
+
+  appActions.renderAll();
+  setSaveStatus("保存済み");
 }
 
 export function resizeImageFile(file) {

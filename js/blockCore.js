@@ -6,7 +6,7 @@ import {
 } from "./blockControls.js";
 import { deleteAssetIfUnused } from "./assets.js";
 import { renderDrawingBlock, insertDrawingBlockAfter, renderPreviewDrawingBlock } from "./drawingBlocks.js";
-import { renderImageBlock, insertImageBlockAfter, renderPreviewImageBlock } from "./imageBlocks.js";
+import { renderImageBlock, insertImageBlockAfter, renderPreviewImageBlock, recropImageBlock } from "./imageBlocks.js";
 import { createMzMessageBlock, renderMzMessageBlock, renderPreviewMzMessageBlock } from "./mzMessageBlocks.js";
 import { getSelectedNote, renderBlockList, saveCurrentNote, scheduleAutoSave } from "./notes.js";
 import { appActions, elements, state } from "./state.js";
@@ -24,6 +24,7 @@ const blockHandlers = {
   moveBlockUp,
   moveBlockDown,
   deleteBlock,
+  recropImageBlock,
   startBlockDrag,
   insertTextBlockAfter,
   insertMzMessageBlockAfter,
@@ -68,7 +69,7 @@ export function renderBlock(block, index, blockCount) {
 
 export function renderPreviewBlock(block) {
   if (block.type === "text") {
-    if (state.mzTextPreviewNoteIds.has(state.selectedNoteId)) {
+    if (state.mzTextPreviewEnabled) {
       return renderPreviewMzMessageBlock({
         ...block,
         type: "mzMessage",

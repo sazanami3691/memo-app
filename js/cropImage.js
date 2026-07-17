@@ -35,10 +35,10 @@ export function setupImageCropModal() {
   });
 }
 
-export async function openImageCropModal(file) {
-  const image = await loadImageFromFile(file);
+export async function openImageCropModal(source) {
+  const image = await loadImageFromSource(source);
   cropState.image = image;
-  cropState.fileName = file.name || "image.jpg";
+  cropState.fileName = getSourceFileName(source);
   cropState.action = null;
   cropState.startPoint = null;
   cropState.startCropRect = null;
@@ -49,6 +49,22 @@ export async function openImageCropModal(file) {
   return new Promise((resolve) => {
     cropState.resolve = resolve;
   });
+}
+
+function loadImageFromSource(source) {
+  if (source && typeof source.dataUrl === "string") {
+    return loadImageFromDataUrl(source.dataUrl);
+  }
+
+  return loadImageFromFile(source);
+}
+
+function getSourceFileName(source) {
+  if (source && typeof source.fileName === "string" && source.fileName.trim()) {
+    return source.fileName;
+  }
+
+  return source?.name || "image.jpg";
 }
 
 function loadImageFromFile(file) {
@@ -62,6 +78,15 @@ function loadImageFromFile(file) {
     };
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
+  });
+}
+
+function loadImageFromDataUrl(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("画像を読み込めませんでした。"));
+    image.src = dataUrl;
   });
 }
 

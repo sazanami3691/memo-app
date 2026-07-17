@@ -1,6 +1,13 @@
 "use strict";
 
-import { appActions, elements, MZ_TEXT_PREVIEW_STORAGE_KEY, state, THEME_STORAGE_KEY } from "./state.js";
+import {
+  appActions,
+  elements,
+  MZ_TEXT_PREVIEW_GLOBAL_STORAGE_KEY,
+  MZ_TEXT_PREVIEW_LEGACY_STORAGE_KEY,
+  state,
+  THEME_STORAGE_KEY
+} from "./state.js";
 
 const LIGHT_THEME = "light";
 const DARK_THEME = "dark";
@@ -30,27 +37,19 @@ export function renderThemeButton() {
     : "ダークテーマに切替";
 }
 
-export function toggleSelectedNoteMzTextPreview() {
-  if (!state.selectedNoteId) return;
-
-  if (state.mzTextPreviewNoteIds.has(state.selectedNoteId)) {
-    state.mzTextPreviewNoteIds.delete(state.selectedNoteId);
-  } else {
-    state.mzTextPreviewNoteIds.add(state.selectedNoteId);
-  }
-
-  saveMzTextPreviewSettings();
+export function toggleGlobalMzTextPreview() {
+  state.mzTextPreviewEnabled = !state.mzTextPreviewEnabled;
+  saveMzTextPreviewSetting();
   appActions.renderAll();
 }
 
 export function renderMzTextPreviewButton() {
   if (!elements.mzTextPreviewToggleButton) return;
 
-  const hasSelectedNote = Boolean(state.selectedNoteId);
-  const isEnabled = hasSelectedNote && state.mzTextPreviewNoteIds.has(state.selectedNoteId);
-  elements.mzTextPreviewToggleButton.disabled = !hasSelectedNote;
-  elements.mzTextPreviewToggleButton.textContent = `通常ブロックをMZ表示: ${isEnabled ? "ON" : "OFF"}`;
-  elements.mzTextPreviewToggleButton.setAttribute("aria-pressed", isEnabled ? "true" : "false");
+  elements.mzTextPreviewToggleButton.disabled = false;
+  elements.mzTextPreviewToggleButton.textContent =
+    `通常ブロックをMZ表示（全メモ）: ${state.mzTextPreviewEnabled ? "ON" : "OFF"}`;
+  elements.mzTextPreviewToggleButton.setAttribute("aria-pressed", state.mzTextPreviewEnabled ? "true" : "false");
 }
 
 export async function updateApp() {
@@ -84,27 +83,53 @@ function applyMzDisplayMode(mode) {
 }
 
 function loadMzTextPreviewSettings() {
-  state.mzTextPreviewNoteIds = new Set();
+  const savedGlobalValue = localStorage.getItem(MZ_TEXT_PREVIEW_GLOBAL_STORAGE_KEY);
+  if (savedGlobalValue !== null) {
+    state.mzTextPreviewEnabled = parseMzTextPreviewBoolean(savedGlobalValue);
+    return;
+  }
 
+  state.mzTextPreviewEnabled = migrateLegacyMzTextPreviewSetting();
+  saveMzTextPreviewSetting();
+}
+
+function parseMzTextPreviewBoolean(value) {
   try {
-    const savedValue = localStorage.getItem(MZ_TEXT_PREVIEW_STORAGE_KEY);
-    const noteIds = JSON.parse(savedValue || "[]");
-    if (!Array.isArray(noteIds)) return;
+    const parsedValue = JSON.parse(value);
+    if (typeof parsedValue !== "boolean") {
+      console.warn("MZ表示設定が想定外の形式です。");
+      return false;
+    }
 
-    noteIds.forEach((noteId) => {
-      if (typeof noteId === "string") {
-        state.mzTextPreviewNoteIds.add(noteId);
-      }
-    });
+    return parsedValue;
   } catch (error) {
     console.warn("MZ表示設定の読み込みに失敗しました。", error);
+    return false;
   }
 }
 
-function saveMzTextPreviewSettings() {
+function migrateLegacyMzTextPreviewSetting() {
+  try {
+    const savedValue = localStorage.getItem(MZ_TEXT_PREVIEW_LEGACY_STORAGE_KEY);
+    if (savedValue === null) return false;
+
+    const noteIds = JSON.parse(savedValue);
+    if (!Array.isArray(noteIds)) {
+      console.warn("旧MZ表示設定が想定外の形式です。");
+      return false;
+    }
+
+    return noteIds.length > 0;
+  } catch (error) {
+    console.warn("旧MZ表示設定の移行に失敗しました。", error);
+    return false;
+  }
+}
+
+function saveMzTextPreviewSetting() {
   localStorage.setItem(
-    MZ_TEXT_PREVIEW_STORAGE_KEY,
-    JSON.stringify(Array.from(state.mzTextPreviewNoteIds))
+    MZ_TEXT_PREVIEW_GLOBAL_STORAGE_KEY,
+    JSON.stringify(state.mzTextPreviewEnabled)
   );
 }
 
