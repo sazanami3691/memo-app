@@ -6,7 +6,7 @@ import {
 } from "./blockControls.js";
 import { deleteAssetIfUnused } from "./assets.js";
 import { renderDrawingBlock, insertDrawingBlockAfter, renderPreviewDrawingBlock } from "./drawingBlocks.js";
-import { renderImageBlock, insertImageBlockAfter, renderPreviewImageBlock } from "./imageBlocks.js";
+import { renderImageBlock, insertImageBlockAfter, renderPreviewImageBlock, recropImageBlock } from "./imageBlocks.js";
 import { createMzMessageBlock, renderMzMessageBlock, renderPreviewMzMessageBlock } from "./mzMessageBlocks.js";
 import { getSelectedNote, renderBlockList, saveCurrentNote, scheduleAutoSave } from "./notes.js";
 import { appActions, elements, state } from "./state.js";
@@ -15,6 +15,8 @@ import { createEmptyList } from "./utils.js";
 
 const BLOCK_DRAG_LONG_PRESS_MS = 300;
 const BLOCK_DRAG_MOUSE_MOVE_THRESHOLD = 6;
+const BLOCK_DRAG_AUTO_SCROLL_EDGE_SIZE = 96;
+const BLOCK_DRAG_AUTO_SCROLL_MAX_SPEED = 18;
 
 let blockDragState = null;
 
@@ -22,6 +24,7 @@ const blockHandlers = {
   moveBlockUp,
   moveBlockDown,
   deleteBlock,
+  recropImageBlock,
   startBlockDrag,
   insertTextBlockAfter,
   insertMzMessageBlockAfter,
@@ -66,6 +69,14 @@ export function renderBlock(block, index, blockCount) {
 
 export function renderPreviewBlock(block) {
   if (block.type === "text") {
+    if (state.mzTextPreviewEnabled) {
+      return renderPreviewMzMessageBlock({
+        ...block,
+        type: "mzMessage",
+        speakerName: ""
+      });
+    }
+
     return renderPreviewTextBlock(block);
   }
 
@@ -248,8 +259,11 @@ export function startBlockDrag(blockId, event) {
     pointerType: event.pointerType || "mouse",
     startX: event.clientX,
     startY: event.clientY,
+    lastClientY: event.clientY,
     isDragging: false,
     dropIndex: null,
+    scrollContainer: getBlockDragScrollContainer(sourceElement),
+    autoScrollFrame: null,
     longPressTimer: window.setTimeout(() => beginBlockDrag(), BLOCK_DRAG_LONG_PRESS_MS)
   };
 
@@ -260,6 +274,7 @@ export function startBlockDrag(blockId, event) {
 
 function handleBlockDragMove(event) {
   if (!blockDragState || event.pointerId !== blockDragState.pointerId) return;
+  blockDragState.lastClientY = event.clientY;
 
   const moveDistance = Math.hypot(
     event.clientX - blockDragState.startX,
@@ -276,6 +291,7 @@ function handleBlockDragMove(event) {
 
   event.preventDefault();
   updateBlockDropIndicator(event.clientY);
+  updateBlockDragAutoScroll(event.clientY);
 }
 
 function beginBlockDrag() {
@@ -287,6 +303,7 @@ function beginBlockDrag() {
   document.body.classList.add("block-drag-active");
   blockDragState.indicator = createBlockDropIndicator();
   updateBlockDropIndicator(blockDragState.startY);
+  updateBlockDragAutoScroll(blockDragState.lastClientY);
 }
 
 function finishBlockDrag(event) {
@@ -352,6 +369,7 @@ function cleanupBlockDrag() {
   if (!blockDragState) return;
 
   window.clearTimeout(blockDragState.longPressTimer);
+  stopBlockDragAutoScroll();
   blockDragState.sourceElement.classList.remove("is-dragging");
   blockDragState.sourceElement.releasePointerCapture?.(blockDragState.pointerId);
   blockDragState.indicator?.remove();
@@ -380,6 +398,127 @@ function getEditableBlockElements() {
 
 function getBlockElementById(blockId) {
   return getEditableBlockElements().find((element) => element.dataset.blockId === blockId) || null;
+}
+
+function updateBlockDragAutoScroll(clientY) {
+  if (!blockDragState?.isDragging) return;
+
+  const speed = getBlockDragAutoScrollSpeed(clientY);
+  if (speed === 0) {
+    stopBlockDragAutoScroll();
+    return;
+  }
+
+  if (blockDragState.autoScrollFrame !== null) return;
+  blockDragState.autoScrollFrame = window.requestAnimationFrame(runBlockDragAutoScroll);
+}
+
+function runBlockDragAutoScroll() {
+  if (!blockDragState?.isDragging) return;
+
+  blockDragState.autoScrollFrame = null;
+  const speed = getBlockDragAutoScrollSpeed(blockDragState.lastClientY);
+  if (speed === 0) return;
+
+  const scrolled = scrollBlockDragContainer(speed);
+  if (scrolled !== 0) {
+    updateBlockDropIndicator(blockDragState.lastClientY);
+  }
+
+  if (scrolled !== 0 && blockDragState.autoScrollFrame === null) {
+    blockDragState.autoScrollFrame = window.requestAnimationFrame(runBlockDragAutoScroll);
+  }
+}
+
+function stopBlockDragAutoScroll() {
+  if (!blockDragState || blockDragState.autoScrollFrame === null) return;
+
+  window.cancelAnimationFrame(blockDragState.autoScrollFrame);
+  blockDragState.autoScrollFrame = null;
+}
+
+function getBlockDragAutoScrollSpeed(clientY) {
+  if (!blockDragState?.scrollContainer) return 0;
+
+  const bounds = getScrollContainerViewportBounds(blockDragState.scrollContainer);
+  if (!bounds) return 0;
+
+  const edgeSize = Math.min(BLOCK_DRAG_AUTO_SCROLL_EDGE_SIZE, Math.max(32, bounds.height / 2));
+  const distanceToTop = clientY - bounds.top;
+  const distanceToBottom = bounds.bottom - clientY;
+
+  if (distanceToTop < edgeSize) {
+    const intensity = Math.max(0, Math.min(1, (edgeSize - Math.max(0, distanceToTop)) / edgeSize));
+    return -Math.ceil(BLOCK_DRAG_AUTO_SCROLL_MAX_SPEED * intensity);
+  }
+
+  if (distanceToBottom < edgeSize) {
+    const intensity = Math.max(0, Math.min(1, (edgeSize - Math.max(0, distanceToBottom)) / edgeSize));
+    return Math.ceil(BLOCK_DRAG_AUTO_SCROLL_MAX_SPEED * intensity);
+  }
+
+  return 0;
+}
+
+function scrollBlockDragContainer(speed) {
+  const container = blockDragState?.scrollContainer;
+  if (!container) return 0;
+
+  if (container === window) {
+    const scrollElement = document.scrollingElement || document.documentElement;
+    const maxTop = Math.max(0, scrollElement.scrollHeight - window.innerHeight);
+    const previousTop = window.scrollY || scrollElement.scrollTop;
+    const nextTop = Math.max(0, Math.min(maxTop, previousTop + speed));
+    if (nextTop === previousTop) return 0;
+
+    window.scrollTo({ top: nextTop });
+    return nextTop - previousTop;
+  }
+
+  const maxTop = Math.max(0, container.scrollHeight - container.clientHeight);
+  const previousTop = container.scrollTop;
+  const nextTop = Math.max(0, Math.min(maxTop, previousTop + speed));
+  if (nextTop === previousTop) return 0;
+
+  container.scrollTop = nextTop;
+  return nextTop - previousTop;
+}
+
+function getScrollContainerViewportBounds(container) {
+  if (container === window) {
+    return {
+      top: 0,
+      bottom: window.innerHeight,
+      height: window.innerHeight
+    };
+  }
+
+  const rect = container.getBoundingClientRect();
+  return {
+    top: rect.top,
+    bottom: rect.bottom,
+    height: rect.height
+  };
+}
+
+function getBlockDragScrollContainer(element) {
+  let current = element?.parentElement || null;
+
+  while (current && current !== document.body && current !== document.documentElement) {
+    if (isScrollableBlockDragContainer(current)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+
+  return window;
+}
+
+function isScrollableBlockDragContainer(element) {
+  const style = window.getComputedStyle(element);
+  const overflowY = style.overflowY;
+  const canScrollY = overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
+  return canScrollY && element.scrollHeight > element.clientHeight + 1;
 }
 
 function focusEditableBlock(blockId) {

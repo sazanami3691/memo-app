@@ -46,9 +46,9 @@ import {
 import {
   initializeMzDisplayMode,
   initializeTheme,
-  renderMzDisplayModeButton,
+  renderMzTextPreviewButton,
   renderThemeButton,
-  toggleMzDisplayMode,
+  toggleGlobalMzTextPreview,
   toggleTheme,
   updateApp
 } from "./js/options.js";
@@ -76,6 +76,7 @@ import {
 } from "./js/state.js";
 
 const MENU_TOGGLE_GUARD_MS = 300;
+const CONTROL_PANEL_VIEWPORT_MARGIN = 12;
 let lastAddPanelToggleAt = 0;
 let lastControlPanelToggleAt = 0;
 
@@ -122,7 +123,7 @@ function collectElements() {
   elements.registerReusableImageButton = document.getElementById("registerReusableImageButton");
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
-  elements.mzDisplayModeButton = document.getElementById("mzDisplayModeButton");
+  elements.mzTextPreviewToggleButton = document.getElementById("mzTextPreviewToggleButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
@@ -198,10 +199,7 @@ function registerEventListeners() {
   elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
-  elements.mzDisplayModeButton.addEventListener("click", () => runMenuAction(() => {
-    toggleMzDisplayMode();
-    renderEditor();
-  }));
+  elements.mzTextPreviewToggleButton.addEventListener("click", () => runMenuAction(toggleGlobalMzTextPreview));
   elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
@@ -261,6 +259,9 @@ function registerEventListeners() {
   });
   document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
   document.addEventListener("click", handleDocumentClick);
+  window.addEventListener("resize", updateControlPanelMaxHeight);
+  window.addEventListener("orientationchange", updateControlPanelMaxHeight);
+  window.visualViewport?.addEventListener("resize", updateControlPanelMaxHeight);
   window.addEventListener("memo:openReusableImages", (event) => {
     openReusableImageModal({
       afterBlockId: event.detail?.afterBlockId || null
@@ -410,12 +411,27 @@ function setAddPanelOpen(isOpen) {
 function renderControlPanelState() {
   if (!elements.controlPanel || !elements.controlPanelToggle) return;
   elements.controlPanel.classList.toggle("collapsed", !state.controlPanelOpen);
+  if (state.controlPanelOpen) {
+    updateControlPanelMaxHeight();
+    requestAnimationFrame(updateControlPanelMaxHeight);
+  }
   elements.controlPanelToggle.textContent = "⚙";
   elements.controlPanelToggle.setAttribute(
     "aria-label",
     state.controlPanelOpen ? "操作メニューを閉じる" : "操作メニューを開く"
   );
   elements.controlPanelToggle.setAttribute("aria-expanded", state.controlPanelOpen ? "true" : "false");
+}
+
+function updateControlPanelMaxHeight() {
+  if (!state.controlPanelOpen || !elements.controlPanel) return;
+
+  const panelTop = elements.controlPanel.getBoundingClientRect().top;
+  const viewportBottom = window.visualViewport
+    ? window.visualViewport.offsetTop + window.visualViewport.height
+    : window.innerHeight;
+  const availableHeight = Math.max(0, viewportBottom - panelTop - CONTROL_PANEL_VIEWPORT_MARGIN);
+  elements.controlPanel.style.setProperty("--control-panel-max-height", `${availableHeight}px`);
 }
 
 function renderAddPanelState() {
@@ -436,7 +452,7 @@ function renderAll() {
   renderEditor();
   updateActionButtons();
   renderThemeButton();
-  renderMzDisplayModeButton();
+  renderMzTextPreviewButton();
   renderAppView();
   renderScreenHeader();
 }
