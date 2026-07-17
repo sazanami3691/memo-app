@@ -31,6 +31,14 @@ export function createBlockControls(block, index, blockCount, handlers) {
 
   controls.append(dragHandle, upButton, downButton);
 
+  if (block.type === "image" && typeof handlers.replaceImageBlockFromSet === "function") {
+    const replaceButton = document.createElement("button");
+    replaceButton.type = "button";
+    replaceButton.textContent = "画像差し替え";
+    replaceButton.addEventListener("click", () => handlers.replaceImageBlockFromSet(block.id));
+    controls.appendChild(replaceButton);
+  }
+
   if (block.type === "image" && typeof handlers.recropImageBlock === "function") {
     const cropButton = document.createElement("button");
     cropButton.type = "button";

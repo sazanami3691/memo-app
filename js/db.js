@@ -121,7 +121,26 @@ export async function loadData() {
   state.folders = await getAllFolders();
   state.notes = await getAllNotes();
   state.assets = await getAllAssets();
+  normalizeLoadedFolders();
   normalizeLoadedNotes();
+}
+
+function normalizeLoadedFolders() {
+  state.folders.forEach((folder) => {
+    if (folder.parentId) return;
+
+    if (!Array.isArray(folder.imageSets)) {
+      folder.imageSets = [];
+      return;
+    }
+
+    folder.imageSets = folder.imageSets.filter((imageSet) => imageSet && typeof imageSet === "object");
+    folder.imageSets.forEach((imageSet) => {
+      if (!Array.isArray(imageSet.items)) {
+        imageSet.items = [];
+      }
+    });
+  });
 }
 
 function normalizeLoadedNotes() {

@@ -1,19 +1,29 @@
 "use strict";
 
-import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
+import {
+  collectAssetIdsFromImageSets,
+  collectAssetIdsFromNotes,
+  deleteUnusedAssets
+} from "./assets.js";
 import { deleteFolder, deleteNote, saveFolder } from "./db.js";
 import { appActions, elements, state } from "./state.js";
 import { createEmptyList, createId, formatDate, normalizeName } from "./utils.js";
 
 export function createFolderObject(name, parentId) {
   const now = Date.now();
-  return {
+  const folder = {
     id: createId("folder"),
     parentId,
     name,
     createdAt: now,
     updatedAt: now
   };
+
+  if (!parentId) {
+    folder.imageSets = [];
+  }
+
+  return folder;
 }
 
 export async function ensureInitialFolder() {
@@ -110,7 +120,11 @@ export async function deleteSelectedFolder() {
   targetFolderIds.unshift(folder.id);
   const targetNotes = state.notes.filter((note) => targetFolderIds.includes(note.folderId));
   const targetNoteIds = targetNotes.map((note) => note.id);
-  const maybeUnusedAssetIds = collectAssetIdsFromNotes(targetNotes);
+  const targetFolders = state.folders.filter((item) => targetFolderIds.includes(item.id));
+  const maybeUnusedAssetIds = [...new Set([
+    ...collectAssetIdsFromNotes(targetNotes),
+    ...collectAssetIdsFromImageSets(targetFolders)
+  ])];
 
   const message = `「${folder.name}」を削除します。\n子フォルダと中のメモも削除されます。よろしいですか？`;
   if (!confirm(message)) return;
@@ -396,6 +410,16 @@ function getNotesInFolder(folderId) {
 
 export function getSelectedFolder() {
   return state.folders.find((folder) => folder.id === state.selectedFolderId) || null;
+}
+
+export function getParentFolderForNote(note) {
+  if (!note) return null;
+
+  const folder = state.folders.find((item) => item.id === note.folderId);
+  if (!folder) return null;
+  if (!folder.parentId) return folder;
+
+  return state.folders.find((item) => item.id === folder.parentId && !item.parentId) || null;
 }
 
 export function getSortedFolders() {

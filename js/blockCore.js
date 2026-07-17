@@ -24,6 +24,7 @@ const blockHandlers = {
   moveBlockUp,
   moveBlockDown,
   deleteBlock,
+  replaceImageBlockFromSet,
   recropImageBlock,
   startBlockDrag,
   insertTextBlockAfter,
@@ -153,6 +154,15 @@ export function insertMzMessageBlockAfter(blockId) {
 export function insertReusableImageBlockAfter(blockId) {
   window.dispatchEvent(new CustomEvent("memo:openReusableImages", {
     detail: { afterBlockId: blockId }
+  }));
+}
+
+export function replaceImageBlockFromSet(blockId) {
+  window.dispatchEvent(new CustomEvent("memo:openFolderImageSets", {
+    detail: {
+      mode: "replace",
+      replaceBlockId: blockId
+    }
   }));
 }
 

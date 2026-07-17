@@ -38,6 +38,7 @@
             <button id="addMzMessageBlockButton" class="primary-button" type="button">MZ文章追加</button>
             <button id="addImageBlockButton" class="primary-button" type="button">画像ブロック追加</button>
             <button id="addReusableImageBlockButton" class="primary-button" type="button">登録画像から追加</button>
+            <button id="addFolderImageSetBlockButton" class="primary-button" type="button">親フォルダ画像セット</button>
             <button id="addDrawingBlockButton" class="primary-button" type="button">手書きブロック追加</button>
             <button id="scrollToLastBlockButton" type="button">↓ 一番下へ</button>
           </div>
@@ -149,6 +150,7 @@
 
   <input id="imageFileInput" class="hidden" type="file" accept="image/*">
   <input id="reusableImageFileInput" class="hidden" type="file" accept="image/*">
+  <input id="folderImageSetFileInput" class="hidden" type="file" accept="image/*" multiple>
   <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
 
   <div id="imageCropModal" class="image-crop-modal hidden" aria-hidden="true">
@@ -231,6 +233,22 @@
       <div id="reusableImageList" class="reusable-image-list"></div>
       <footer class="reusable-image-modal-footer">
         <button id="reusableImageModalCancelButton" type="button">閉じる</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="folderImageSetModal" class="folder-image-set-modal hidden" aria-hidden="true">
+    <div class="folder-image-set-modal-content" role="dialog" aria-modal="true" aria-labelledby="folderImageSetModalTitle">
+      <header class="folder-image-set-modal-header">
+        <h2 id="folderImageSetModalTitle">親フォルダの画像セット</h2>
+        <button id="folderImageSetModalCloseButton" type="button">閉じる</button>
+      </header>
+      <div class="folder-image-set-toolbar">
+        <button id="createFolderImageSetButton" class="primary-button" type="button">＋ 画像セット作成</button>
+      </div>
+      <div id="folderImageSetList" class="folder-image-set-list"></div>
+      <footer class="folder-image-set-modal-footer">
+        <button id="folderImageSetModalCancelButton" type="button">閉じる</button>
       </footer>
     </div>
   </div>

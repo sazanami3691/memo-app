@@ -3,7 +3,7 @@
 import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
 import { createTextBlock, renderBlock, renderPreviewBlock } from "./blocks.js";
 import { deleteNote, saveNote } from "./db.js";
-import { getSelectedFolder } from "./folders.js";
+import { getParentFolderForNote, getSelectedFolder } from "./folders.js";
 import { AUTO_SAVE_DELAY, appActions, elements, state } from "./state.js";
 import { createEmptyList, createId, formatDate } from "./utils.js";
 
@@ -270,6 +270,7 @@ export function updateActionButtons() {
   const hasFolder = Boolean(selectedFolder);
   const canAddChild = Boolean(state.activeParentFolderId);
   const hasNote = Boolean(getSelectedNote());
+  const hasParentImageSetFolder = Boolean(getParentFolderForNote(getSelectedNote()));
   const canCreateNote = hasFolder && canCreateNoteInCurrentView(selectedFolder);
 
   elements.addChildFolderButton.disabled = !canAddChild;
@@ -283,6 +284,7 @@ export function updateActionButtons() {
   elements.addMzMessageBlockButton.disabled = !hasNote;
   elements.addImageBlockButton.disabled = !hasNote;
   elements.addReusableImageBlockButton.disabled = !hasNote;
+  elements.addFolderImageSetBlockButton.disabled = !hasNote || !hasParentImageSetFolder;
   elements.addDrawingBlockButton.disabled = !hasNote;
   elements.scrollToLastBlockButton.disabled = !hasNote;
   elements.mzTextPreviewToggleButton.disabled = false;

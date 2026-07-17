@@ -28,12 +28,19 @@ import { createBackupFileName, downloadJsonFile, readJsonFile } from "./utils.js
 
 export async function exportBackup() {
   try {
+    const folders = (await getAllFolders()).map((folder) => {
+      if (folder.parentId) return folder;
+      return {
+        ...folder,
+        imageSets: Array.isArray(folder.imageSets) ? folder.imageSets : []
+      };
+    });
     const backup = {
       appName: BACKUP_APP_NAME,
       backupVersion: BACKUP_VERSION,
       exportedAt: Date.now(),
       data: {
-        folders: await getAllFolders(),
+        folders,
         notes: await getAllNotes(),
         assets: await getAllAssets()
       }

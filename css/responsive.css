@@ -42,4 +42,31 @@
   .reusable-image-actions button {
     flex: 1 1 120px;
   }
+
+  .folder-image-set-modal {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  .folder-image-set-modal-content {
+    width: 100%;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: 10px;
+  }
+
+  .folder-image-set-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .folder-image-set-header-actions button {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 520px) {
+  .folder-image-set-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
 }

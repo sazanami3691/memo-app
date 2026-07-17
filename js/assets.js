@@ -30,11 +30,30 @@ export function isAssetUsedElsewhere(assetId, exceptNoteId, exceptBlockId) {
   });
 }
 
-export async function deleteAssetIfUnused(assetId, exceptNoteId, exceptBlockId) {
-  const asset = getAssetById(assetId);
-  if (isReusableImageAsset(asset)) return;
+export function isAssetReferencedByImageSets(assetId) {
+  return state.folders.some((folder) => {
+    if (!Array.isArray(folder.imageSets)) return false;
+    return folder.imageSets.some((imageSet) => {
+      return Array.isArray(imageSet?.items) &&
+        imageSet.items.some((item) => item?.assetId === assetId);
+    });
+  });
+}
 
-  if (isAssetUsedElsewhere(assetId, exceptNoteId, exceptBlockId)) return;
+export function isAssetReferencedAnywhere(assetId, options = {}) {
+  const asset = getAssetById(assetId);
+  if (isReusableImageAsset(asset)) return true;
+  if (isAssetReferencedByImageSets(assetId)) return true;
+
+  return isAssetUsedElsewhere(
+    assetId,
+    options.exceptNoteId || null,
+    options.exceptBlockId || null
+  );
+}
+
+export async function deleteAssetIfUnused(assetId, exceptNoteId, exceptBlockId) {
+  if (isAssetReferencedAnywhere(assetId, { exceptNoteId, exceptBlockId })) return;
 
   await deleteAsset(assetId);
   state.assets = state.assets.filter((asset) => asset.id !== assetId);
@@ -42,14 +61,23 @@ export async function deleteAssetIfUnused(assetId, exceptNoteId, exceptBlockId) 
 
 export async function deleteUnusedAssets(assetIds) {
   for (const assetId of assetIds) {
-    const asset = getAssetById(assetId);
-    if (isReusableImageAsset(asset)) continue;
-
-    if (!isAssetUsedElsewhere(assetId, null, null)) {
+    if (!isAssetReferencedAnywhere(assetId)) {
       await deleteAsset(assetId);
       state.assets = state.assets.filter((asset) => asset.id !== assetId);
     }
   }
+}
+
+export function collectAssetIdsFromImageSets(targetFolders) {
+  const assetIds = targetFolders.flatMap((folder) => {
+    if (!Array.isArray(folder.imageSets)) return [];
+    return folder.imageSets.flatMap((imageSet) => {
+      if (!Array.isArray(imageSet?.items)) return [];
+      return imageSet.items.map((item) => item?.assetId).filter(Boolean);
+    });
+  });
+
+  return [...new Set(assetIds)];
 }
 
 export function collectAssetIdsFromNotes(targetNotes) {

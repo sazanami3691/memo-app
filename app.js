@@ -29,6 +29,12 @@ import {
   selectInitialFolder
 } from "./js/folders.js";
 import {
+  closeFolderImageSetModal,
+  createFolderImageSet,
+  handleFolderImageSetFilesSelected,
+  openFolderImageSetModal
+} from "./js/folderImageSets.js";
+import {
   addImageBlock,
   closeImageModal,
   handleImageFileSelected
@@ -141,10 +147,12 @@ function collectElements() {
   elements.addMzMessageBlockButton = document.getElementById("addMzMessageBlockButton");
   elements.addImageBlockButton = document.getElementById("addImageBlockButton");
   elements.addReusableImageBlockButton = document.getElementById("addReusableImageBlockButton");
+  elements.addFolderImageSetBlockButton = document.getElementById("addFolderImageSetBlockButton");
   elements.addDrawingBlockButton = document.getElementById("addDrawingBlockButton");
   elements.scrollToLastBlockButton = document.getElementById("scrollToLastBlockButton");
   elements.imageFileInput = document.getElementById("imageFileInput");
   elements.reusableImageFileInput = document.getElementById("reusableImageFileInput");
+  elements.folderImageSetFileInput = document.getElementById("folderImageSetFileInput");
   elements.imageCropModal = document.getElementById("imageCropModal");
   elements.imageCropCloseButton = document.getElementById("imageCropCloseButton");
   elements.imageCropCanvas = document.getElementById("imageCropCanvas");
@@ -178,6 +186,12 @@ function collectElements() {
   elements.reusableImageModalCloseButton = document.getElementById("reusableImageModalCloseButton");
   elements.reusableImageList = document.getElementById("reusableImageList");
   elements.reusableImageModalCancelButton = document.getElementById("reusableImageModalCancelButton");
+  elements.folderImageSetModal = document.getElementById("folderImageSetModal");
+  elements.folderImageSetModalTitle = document.getElementById("folderImageSetModalTitle");
+  elements.folderImageSetModalCloseButton = document.getElementById("folderImageSetModalCloseButton");
+  elements.createFolderImageSetButton = document.getElementById("createFolderImageSetButton");
+  elements.folderImageSetList = document.getElementById("folderImageSetList");
+  elements.folderImageSetModalCancelButton = document.getElementById("folderImageSetModalCancelButton");
 }
 
 function registerEventListeners() {
@@ -217,10 +231,12 @@ function registerEventListeners() {
   elements.addMzMessageBlockButton.addEventListener("click", () => runAddMenuAction(addMzMessageBlock));
   elements.addImageBlockButton.addEventListener("click", () => runAddMenuAction(addImageBlock));
   elements.addReusableImageBlockButton.addEventListener("click", () => runAddMenuAction(openReusableImageModal));
+  elements.addFolderImageSetBlockButton.addEventListener("click", () => runAddMenuAction(openFolderImageSetModal));
   elements.addDrawingBlockButton.addEventListener("click", () => runAddMenuAction(addDrawingBlock));
   elements.scrollToLastBlockButton.addEventListener("click", () => runAddMenuAction(scrollToLastBlock));
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
   elements.reusableImageFileInput.addEventListener("change", handleReusableImageFileSelected);
+  elements.folderImageSetFileInput.addEventListener("change", handleFolderImageSetFilesSelected);
   elements.imageModalClose.addEventListener("click", closeImageModal);
   elements.imageModal.addEventListener("click", (event) => {
     if (event.target === elements.imageModal) {
@@ -257,6 +273,14 @@ function registerEventListeners() {
       closeReusableImageModal();
     }
   });
+  elements.folderImageSetModalCloseButton.addEventListener("click", closeFolderImageSetModal);
+  elements.folderImageSetModalCancelButton.addEventListener("click", closeFolderImageSetModal);
+  elements.createFolderImageSetButton.addEventListener("click", createFolderImageSet);
+  elements.folderImageSetModal.addEventListener("click", (event) => {
+    if (event.target === elements.folderImageSetModal) {
+      closeFolderImageSetModal();
+    }
+  });
   document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
   document.addEventListener("click", handleDocumentClick);
   window.addEventListener("resize", updateControlPanelMaxHeight);
@@ -265,6 +289,12 @@ function registerEventListeners() {
   window.addEventListener("memo:openReusableImages", (event) => {
     openReusableImageModal({
       afterBlockId: event.detail?.afterBlockId || null
+    });
+  });
+  window.addEventListener("memo:openFolderImageSets", (event) => {
+    openFolderImageSetModal({
+      mode: event.detail?.mode,
+      replaceBlockId: event.detail?.replaceBlockId || null
     });
   });
 

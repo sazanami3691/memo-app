@@ -86,7 +86,7 @@ export async function createImageAssetFromDataUrl(dataUrl, fileName) {
   return asset;
 }
 
-function createImageAssetObject(dataUrl, fileName) {
+export function createImageAssetObject(dataUrl, fileName) {
   return {
     id: createId("asset"),
     type: "image",
