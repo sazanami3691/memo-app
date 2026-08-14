@@ -58,6 +58,7 @@ export const state = {
   pendingFolderImageSetReplaceBlockId: null,
   pendingFolderImageSetUploadSetId: null,
   folderImageSetProcessing: false,
+  expandedFolderImageSetIds: new Set(),
   pendingDrawingInsertAfterBlockId: null,
   editingDrawingAssetId: null,
   drawingContext: null,

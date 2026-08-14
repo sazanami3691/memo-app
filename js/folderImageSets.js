@@ -42,6 +42,7 @@ export function openFolderImageSetModal(options = {}) {
     : null;
   state.pendingFolderImageSetUploadSetId = null;
   state.folderImageSetProcessing = false;
+  state.expandedFolderImageSetIds = new Set();
 
   renderFolderImageSetModal();
   elements.folderImageSetModal.classList.remove("hidden");
@@ -64,6 +65,7 @@ export function resetFolderImageSetModalState() {
   state.pendingFolderImageSetReplaceBlockId = null;
   state.pendingFolderImageSetUploadSetId = null;
   state.folderImageSetProcessing = false;
+  state.expandedFolderImageSetIds = new Set();
   if (elements.folderImageSetFileInput) {
     elements.folderImageSetFileInput.value = "";
   }
@@ -159,6 +161,7 @@ export async function handleFolderImageSetFilesSelected() {
     imageSet.updatedAt = Date.now();
     parentFolder.updatedAt = imageSet.updatedAt;
     await saveFolder(parentFolder);
+    state.expandedFolderImageSetIds.add(imageSet.id);
     setSaveStatus("保存済み");
   } catch (error) {
     if (itemsAdded) {
@@ -278,6 +281,32 @@ export async function selectFolderImageSetItem(assetId) {
   await insertImageSetBlock(assetId);
 }
 
+export function toggleFolderImageSet(imageSetId) {
+  if (state.folderImageSetProcessing || !findImageSet(imageSetId)) return;
+
+  if (state.expandedFolderImageSetIds.has(imageSetId)) {
+    state.expandedFolderImageSetIds.delete(imageSetId);
+  } else {
+    state.expandedFolderImageSetIds.add(imageSetId);
+  }
+  renderFolderImageSetModal();
+}
+
+export function expandAllFolderImageSets() {
+  if (state.folderImageSetProcessing) return;
+  const parentFolder = getCurrentParentFolder();
+  if (!parentFolder) return;
+
+  state.expandedFolderImageSetIds = new Set(parentFolder.imageSets.map((imageSet) => imageSet.id));
+  renderFolderImageSetModal();
+}
+
+export function collapseAllFolderImageSets() {
+  if (state.folderImageSetProcessing) return;
+  state.expandedFolderImageSetIds = new Set();
+  renderFolderImageSetModal();
+}
+
 export function renderFolderImageSetModal() {
   const parentFolder = getCurrentParentFolder();
   const list = elements.folderImageSetList;
@@ -290,6 +319,14 @@ export function renderFolderImageSetModal() {
   list.innerHTML = "";
 
   const imageSets = Array.isArray(parentFolder.imageSets) ? parentFolder.imageSets : [];
+  const expandedCount = imageSets.filter((imageSet) => {
+    return state.expandedFolderImageSetIds.has(imageSet.id);
+  }).length;
+  elements.expandAllFolderImageSetsButton.disabled =
+    state.folderImageSetProcessing || imageSets.length === 0 || expandedCount === imageSets.length;
+  elements.collapseAllFolderImageSetsButton.disabled =
+    state.folderImageSetProcessing || expandedCount === 0;
+
   if (imageSets.length === 0) {
     list.appendChild(createEmptyList("画像セットはまだありません。"));
     return;
@@ -303,12 +340,41 @@ export function renderFolderImageSetModal() {
 function createImageSetSection(imageSet) {
   const section = document.createElement("section");
   section.className = "folder-image-set";
+  const items = Array.isArray(imageSet.items) ? imageSet.items : [];
+  const isExpanded = state.expandedFolderImageSetIds.has(imageSet.id);
+  section.classList.toggle("is-expanded", isExpanded);
 
   const header = document.createElement("header");
   header.className = "folder-image-set-header";
 
-  const title = document.createElement("h3");
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.className = "folder-image-set-toggle";
+  toggleButton.disabled = state.folderImageSetProcessing;
+  toggleButton.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+  toggleButton.addEventListener("click", () => toggleFolderImageSet(imageSet.id));
+
+  const indicator = document.createElement("span");
+  indicator.className = "folder-image-set-toggle-indicator";
+  indicator.textContent = isExpanded ? "▼" : "▶";
+  indicator.setAttribute("aria-hidden", "true");
+
+  const title = document.createElement("span");
+  title.className = "folder-image-set-title";
   title.textContent = imageSet.name || "名称未設定";
+
+  const count = document.createElement("span");
+  count.className = "folder-image-set-count";
+  count.textContent = `${items.length}枚`;
+
+  toggleButton.append(indicator, title, count);
+  header.appendChild(toggleButton);
+  section.appendChild(header);
+
+  if (!isExpanded) return section;
+
+  const content = document.createElement("div");
+  content.className = "folder-image-set-content";
 
   const actions = document.createElement("div");
   actions.className = "folder-image-set-header-actions";
@@ -327,18 +393,17 @@ function createImageSetSection(imageSet) {
   addButton.addEventListener("click", () => chooseFolderImageSetFiles(imageSet.id));
 
   actions.append(renameButton, addButton);
-  header.append(title, actions);
-  section.appendChild(header);
+  content.appendChild(actions);
 
   const grid = document.createElement("div");
   grid.className = "folder-image-set-grid";
-  const items = Array.isArray(imageSet.items) ? imageSet.items : [];
   if (items.length === 0) {
     grid.appendChild(createEmptyList("このセットには画像がありません。"));
   } else {
     items.forEach((item) => grid.appendChild(createImageSetItem(imageSet.id, item)));
   }
-  section.appendChild(grid);
+  content.appendChild(grid);
+  section.appendChild(content);
   return section;
 }
 

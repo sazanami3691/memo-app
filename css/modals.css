@@ -145,34 +145,71 @@
 
 .folder-image-set-toolbar {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.folder-image-set-toolbar-actions {
+  display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .folder-image-set {
   display: grid;
-  gap: 10px;
   border-top: 1px solid var(--line);
-  padding-top: 14px;
 }
 
 .folder-image-set:first-child {
   border-top: 0;
-  padding-top: 0;
 }
 
 .folder-image-set-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  min-width: 0;
 }
 
-.folder-image-set-header h3 {
-  margin: 0;
+.folder-image-set-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 8px 6px;
+  text-align: left;
+}
+
+.folder-image-set-toggle:hover {
+  background: var(--panel-soft);
+}
+
+.folder-image-set-toggle-indicator {
+  width: 1.2em;
+  color: var(--muted);
+  text-align: center;
+}
+
+.folder-image-set-title {
   min-width: 0;
-  font-size: 1rem;
+  font-weight: 700;
   overflow-wrap: anywhere;
+}
+
+.folder-image-set-count {
+  color: var(--muted);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.folder-image-set-content {
+  display: grid;
+  gap: 10px;
+  padding: 2px 0 14px 32px;
 }
 
 .folder-image-set-header-actions,

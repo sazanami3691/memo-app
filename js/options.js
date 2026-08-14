@@ -38,8 +38,7 @@ export function renderThemeButton() {
 }
 
 export function toggleGlobalMzTextPreview() {
-  state.mzTextPreviewEnabled = !state.mzTextPreviewEnabled;
-  saveMzTextPreviewSetting();
+  setMzTextPreviewEnabled(!state.mzTextPreviewEnabled, true);
   appActions.renderAll();
 }
 
@@ -61,10 +60,10 @@ export async function updateApp() {
   if (!ok) return;
 
   try {
+    await unregisterServiceWorkersIfAvailable();
     await clearAppCachesIfAvailable();
-    await updateServiceWorkersIfAvailable();
   } catch (error) {
-    console.warn("アプリ更新前のキャッシュ更新に失敗しました。再読み込みは続行します。", error);
+    console.warn("アプリ更新前のキャッシュ解除に失敗しました。再読み込みは続行します。", error);
   }
 
   const url = new URL(window.location.href);
@@ -85,12 +84,17 @@ function applyMzDisplayMode(mode) {
 function loadMzTextPreviewSettings() {
   const savedGlobalValue = localStorage.getItem(MZ_TEXT_PREVIEW_GLOBAL_STORAGE_KEY);
   if (savedGlobalValue !== null) {
-    state.mzTextPreviewEnabled = parseMzTextPreviewBoolean(savedGlobalValue);
+    setMzTextPreviewEnabled(parseMzTextPreviewBoolean(savedGlobalValue));
     return;
   }
 
-  state.mzTextPreviewEnabled = migrateLegacyMzTextPreviewSetting();
+  setMzTextPreviewEnabled(migrateLegacyMzTextPreviewSetting());
   saveMzTextPreviewSetting();
+}
+
+function setMzTextPreviewEnabled(isEnabled, shouldSave = false) {
+  state.mzTextPreviewEnabled = isEnabled === true;
+  if (shouldSave) saveMzTextPreviewSetting();
 }
 
 function parseMzTextPreviewBoolean(value) {
@@ -140,9 +144,12 @@ async function clearAppCachesIfAvailable() {
   await Promise.all(keys.map((key) => window.caches.delete(key)));
 }
 
-async function updateServiceWorkersIfAvailable() {
+async function unregisterServiceWorkersIfAvailable() {
   if (!("serviceWorker" in navigator)) return;
 
   const registrations = await navigator.serviceWorker.getRegistrations();
-  await Promise.all(registrations.map((registration) => registration.update()));
+  const controllingRegistrations = registrations.filter((registration) => {
+    return window.location.href.startsWith(registration.scope);
+  });
+  await Promise.all(controllingRegistrations.map((registration) => registration.unregister()));
 }

@@ -55,13 +55,19 @@
     padding: 10px;
   }
 
-  .folder-image-set-header {
+  .folder-image-set-toolbar {
     align-items: stretch;
-    flex-direction: column;
   }
 
+  .folder-image-set-toolbar > button,
+  .folder-image-set-toolbar-actions,
+  .folder-image-set-toolbar-actions button,
   .folder-image-set-header-actions button {
     flex: 1 1 180px;
+  }
+
+  .folder-image-set-content {
+    padding-left: 0;
   }
 }
 

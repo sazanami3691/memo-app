@@ -30,7 +30,9 @@ import {
 } from "./js/folders.js";
 import {
   closeFolderImageSetModal,
+  collapseAllFolderImageSets,
   createFolderImageSet,
+  expandAllFolderImageSets,
   handleFolderImageSetFilesSelected,
   openFolderImageSetModal
 } from "./js/folderImageSets.js";
@@ -190,6 +192,8 @@ function collectElements() {
   elements.folderImageSetModalTitle = document.getElementById("folderImageSetModalTitle");
   elements.folderImageSetModalCloseButton = document.getElementById("folderImageSetModalCloseButton");
   elements.createFolderImageSetButton = document.getElementById("createFolderImageSetButton");
+  elements.expandAllFolderImageSetsButton = document.getElementById("expandAllFolderImageSetsButton");
+  elements.collapseAllFolderImageSetsButton = document.getElementById("collapseAllFolderImageSetsButton");
   elements.folderImageSetList = document.getElementById("folderImageSetList");
   elements.folderImageSetModalCancelButton = document.getElementById("folderImageSetModalCancelButton");
 }
@@ -276,6 +280,8 @@ function registerEventListeners() {
   elements.folderImageSetModalCloseButton.addEventListener("click", closeFolderImageSetModal);
   elements.folderImageSetModalCancelButton.addEventListener("click", closeFolderImageSetModal);
   elements.createFolderImageSetButton.addEventListener("click", createFolderImageSet);
+  elements.expandAllFolderImageSetsButton.addEventListener("click", expandAllFolderImageSets);
+  elements.collapseAllFolderImageSetsButton.addEventListener("click", collapseAllFolderImageSets);
   elements.folderImageSetModal.addEventListener("click", (event) => {
     if (event.target === elements.folderImageSetModal) {
       closeFolderImageSetModal();
