@@ -80,6 +80,48 @@
   min-height: 44px;
 }
 
+.frequent-item-list {
+  display: grid;
+  gap: 6px;
+}
+
+.frequent-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.frequent-item-icon {
+  white-space: nowrap;
+}
+
+.frequent-item-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.frequent-item-title {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.frequent-item-meta,
+.frequent-item-empty {
+  color: var(--muted);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.frequent-item-empty {
+  padding: 2px 0;
+}
+
 .folder-list,
 .note-list,
 .block-list {

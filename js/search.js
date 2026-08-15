@@ -1,6 +1,7 @@
 "use strict";
 
 import { appActions, elements, state } from "./state.js";
+import { getFolderPath, openNoteById } from "./noteNavigation.js";
 import { formatDate } from "./utils.js";
 
 export function openSearchView() {
@@ -137,7 +138,7 @@ function createNoteSearchResult({ note, folderPath, reasons }) {
     icon,
     title: note.title || "無題",
     meta: `${folderPath} / ${reasons.join("・")} / 更新: ${formatDate(note.updatedAt)}`,
-    onClick: () => openNoteFromSearch(note)
+    onClick: () => openNoteById(note.id, { editorReturnView: "search" })
   });
 }
 
@@ -200,29 +201,6 @@ function createSearchMessage(text) {
   return message;
 }
 
-function openNoteFromSearch(note) {
-  const folder = state.folders.find((item) => item.id === note.folderId);
-  if (!folder) return;
-
-  state.selectedFolderId = folder.id;
-  state.selectedNoteId = note.id;
-  state.editorMode = "preview";
-  state.editorReturnView = "search";
-  state.appView = "editor";
-
-  if (folder.parentId) {
-    state.folderNavLevel = "notes";
-    state.activeParentFolderId = folder.parentId;
-    state.activeChildFolderId = folder.id;
-  } else {
-    state.folderNavLevel = "children";
-    state.activeParentFolderId = folder.id;
-    state.activeChildFolderId = null;
-  }
-
-  appActions.renderAll();
-}
-
 function openFolderFromSearch(folder) {
   state.searchReturnState = null;
   state.editorReturnView = null;
@@ -242,15 +220,6 @@ function openFolderFromSearch(folder) {
   }
 
   appActions.renderAll();
-}
-
-function getFolderPath(folderId) {
-  const folder = state.folders.find((item) => item.id === folderId);
-  if (!folder) return "不明なフォルダ";
-  if (!folder.parentId) return folder.name;
-
-  const parent = state.folders.find((item) => item.id === folder.parentId);
-  return parent ? `${parent.name} / ${folder.name}` : folder.name;
 }
 
 function normalizeSearchText(value) {

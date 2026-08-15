@@ -28,6 +28,7 @@ import {
   renderFolderList,
   selectInitialFolder
 } from "./js/folders.js";
+import { renderFrequentItems } from "./js/frequentItems.js";
 import {
   closeFolderImageSetModal,
   collapseAllFolderImageSets,
@@ -45,6 +46,7 @@ import {
   closeMoveNoteModal,
   openMoveNoteModal
 } from "./js/moveNotes.js";
+import { openNoteById } from "./js/noteNavigation.js";
 import {
   closeReusableImageModal,
   handleReusableImageFileSelected,
@@ -120,6 +122,7 @@ function collectElements() {
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
   elements.openSearchButton = document.getElementById("openSearchButton");
+  elements.frequentItemList = document.getElementById("frequentItemList");
   elements.searchInput = document.getElementById("searchInput");
   elements.searchResults = document.getElementById("searchResults");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
@@ -429,6 +432,7 @@ function setControlPanelOpen(isOpen) {
   if (isOpen) {
     state.addPanelOpen = false;
     renderAddPanelState();
+    renderFrequentItems(openFrequentNote);
   }
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, isOpen ? "true" : "false");
   renderControlPanelState();
@@ -485,12 +489,19 @@ function renderAll() {
   renderFolderList();
   renderNoteList();
   renderSearchView();
+  renderFrequentItems(openFrequentNote);
   renderEditor();
   updateActionButtons();
   renderThemeButton();
   renderMzTextPreviewButton();
   renderAppView();
   renderScreenHeader();
+}
+
+function openFrequentNote(noteId) {
+  return runMenuAction(() => openNoteById(noteId, {
+    clearSearchReturnState: true
+  }));
 }
 
 function scrollToLastBlock() {
