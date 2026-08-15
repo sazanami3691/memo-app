@@ -484,13 +484,11 @@ function setAddPanelOpen(isOpen) {
 }
 
 function setQuickAccessOpen(isOpen) {
-  const wasOpen = state.quickAccessOpen;
   state.quickAccessOpen = isOpen;
   if (isOpen) {
     state.addPanelOpen = false;
     state.controlPanelOpen = false;
     localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
-    if (!wasOpen) resetQuickAccessSections();
     renderAddPanelState();
     renderControlPanelState();
     renderQuickAccess(openQuickAccessNote);
