@@ -41,7 +41,10 @@ export async function exportBackup() {
       exportedAt: Date.now(),
       data: {
         folders,
-        notes: await getAllNotes(),
+        notes: (await getAllNotes()).map((note) => ({
+          ...note,
+          isShortcut: note.isShortcut === true
+        })),
         assets: await getAllAssets()
       }
     };

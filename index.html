@@ -25,10 +25,16 @@
         </div>
         <div id="screenHeaderTitle" class="screen-header-title">フォルダ</div>
         <div class="screen-header-right">
+          <button id="quickAccessToggle" class="quick-access-icon-button" type="button" aria-label="クイックアクセス">🔖</button>
           <button id="addPanelToggle" class="add-menu-icon-button" type="button" aria-label="追加メニュー">＋</button>
           <button id="controlPanelToggle" class="control-menu-icon-button" type="button" aria-label="操作メニュー">⚙</button>
         </div>
       </header>
+
+      <div id="quickAccessPanel" class="quick-access-panel collapsed">
+        <div class="quick-access-panel-title">クイックアクセス</div>
+        <div id="quickAccessSections" class="quick-access-sections" aria-live="polite"></div>
+      </div>
 
       <div id="addPanel" class="add-panel collapsed">
         <section class="control-group">
@@ -51,11 +57,6 @@
           <div class="button-stack">
             <button id="openSearchButton" type="button">検索</button>
           </div>
-        </section>
-
-        <section class="control-group">
-          <h3>よく使う項目</h3>
-          <div id="frequentItemList" class="frequent-item-list" aria-live="polite"></div>
         </section>
 
         <section class="control-group">
@@ -139,6 +140,7 @@
 
       <div id="noteActions" class="note-actions hidden">
         <button id="togglePinButton" type="button">☆ お気に入り</button>
+        <button id="toggleShortcutButton" type="button">🔖 ショートカットに追加</button>
         <button id="moveNoteButton" type="button">メモを移動</button>
       </div>
 

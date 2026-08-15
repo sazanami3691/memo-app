@@ -15,6 +15,7 @@ export function createNoteObject(folderId) {
     title: "新規メモ",
     blocks: [createTextBlock("")],
     isPinned: false,
+    isShortcut: false,
     createdAt: now,
     updatedAt: now
   };
@@ -150,6 +151,9 @@ export function renderEditor() {
   elements.togglePinButton.textContent = note.isPinned === true
     ? "★ お気に入り解除"
     : "☆ お気に入り";
+  elements.toggleShortcutButton.textContent = note.isShortcut === true
+    ? "🔖 ショートカット解除"
+    : "🔖 ショートカットに追加";
   renderEditorModeSwitch();
   if (state.editorMode === "edit") {
     renderEditMode(note);
@@ -226,6 +230,16 @@ export async function toggleSelectedNotePin() {
   appActions.renderAll();
 }
 
+export async function toggleSelectedNoteShortcut() {
+  const note = getSelectedNote();
+  if (!note) return;
+
+  note.isShortcut = note.isShortcut !== true;
+  note.updatedAt = Date.now();
+  await saveNote(note);
+  appActions.renderAll();
+}
+
 export function scheduleAutoSave() {
   const note = getSelectedNote();
   if (!note) return;
@@ -279,6 +293,7 @@ export function updateActionButtons() {
   elements.addNoteButton.disabled = !canCreateNote;
   elements.deleteSelectedNoteButton.disabled = !hasNote;
   elements.togglePinButton.disabled = !hasNote;
+  elements.toggleShortcutButton.disabled = !hasNote;
   elements.moveNoteButton.disabled = !hasNote;
   elements.addTextBlockButton.disabled = !hasNote;
   elements.addMzMessageBlockButton.disabled = !hasNote;

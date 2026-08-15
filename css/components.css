@@ -1,11 +1,14 @@
 ﻿.control-panel-toggle,
-.control-menu-icon-button {
+.control-menu-icon-button,
+.quick-access-icon-button {
   min-height: 44px;
   font-weight: 700;
 }
 
-.control-menu-icon-button {
+.control-menu-icon-button,
+.quick-access-icon-button {
   width: 44px;
+  min-width: 44px;
   height: 44px;
   border-radius: 999px;
   padding: 0;
@@ -51,6 +54,35 @@
   pointer-events: auto;
 }
 
+.quick-access-panel {
+  display: grid;
+  gap: 8px;
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 28px));
+  max-height: var(--quick-access-max-height, calc(100dvh - 92px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 10px;
+}
+
+.quick-access-panel-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.quick-access-sections {
+  display: grid;
+}
+
 .control-group {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -80,12 +112,46 @@
   min-height: 44px;
 }
 
-.frequent-item-list {
-  display: grid;
-  gap: 6px;
+.quick-access-section {
+  border-top: 1px solid var(--line);
 }
 
-.frequent-item {
+.quick-access-section:first-child {
+  border-top: 0;
+}
+
+.quick-access-section-toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 4px;
+  text-align: left;
+}
+
+.quick-access-section-indicator,
+.quick-access-section-count {
+  color: var(--muted);
+}
+
+.quick-access-section-title {
+  min-width: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.quick-access-list {
+  display: grid;
+  gap: 6px;
+  padding: 0 0 10px 28px;
+}
+
+.quick-access-item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -96,30 +162,30 @@
   text-align: left;
 }
 
-.frequent-item-icon {
+.quick-access-item-icon {
   white-space: nowrap;
 }
 
-.frequent-item-body {
+.quick-access-item-body {
   display: grid;
   gap: 2px;
   min-width: 0;
 }
 
-.frequent-item-title {
+.quick-access-item-title {
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.frequent-item-meta,
-.frequent-item-empty {
+.quick-access-item-meta,
+.quick-access-empty {
   color: var(--muted);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
 
-.frequent-item-empty {
-  padding: 2px 0;
+.quick-access-empty {
+  padding: 4px 0;
 }
 
 .folder-list,
@@ -382,6 +448,7 @@
 
 .add-menu-icon-button {
   width: 44px;
+  min-width: 44px;
   height: 44px;
   min-height: 44px;
   border-radius: 999px;
@@ -412,14 +479,17 @@
 }
 
 .control-panel,
-.add-panel {
+.add-panel,
+.quick-access-panel {
   touch-action: manipulation;
 }
 
 .control-panel.collapsed,
 #controlPanel.collapsed,
 .add-panel.collapsed,
-#addPanel.collapsed {
+#addPanel.collapsed,
+.quick-access-panel.collapsed,
+#quickAccessPanel.collapsed {
   display: none;
   pointer-events: none;
 }
@@ -427,11 +497,14 @@
 .control-panel:not(.collapsed),
 #controlPanel:not(.collapsed),
 .add-panel:not(.collapsed),
-#addPanel:not(.collapsed) {
+#addPanel:not(.collapsed),
+.quick-access-panel:not(.collapsed),
+#quickAccessPanel:not(.collapsed) {
   pointer-events: auto;
 }
 
-.control-panel:not(.collapsed) {
+.control-panel:not(.collapsed),
+.quick-access-panel:not(.collapsed) {
   touch-action: pan-y;
 }
 

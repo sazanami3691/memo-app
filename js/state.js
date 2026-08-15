@@ -42,6 +42,8 @@ export const state = {
   mzTextPreviewEnabled: false,
   controlPanelOpen: false,
   addPanelOpen: false,
+  quickAccessOpen: false,
+  quickAccessExpandedSections: new Set(["favorites", "shortcuts"]),
   folderNavLevel: "parents",
   activeParentFolderId: null,
   activeChildFolderId: null,

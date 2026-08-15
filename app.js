@@ -28,7 +28,6 @@ import {
   renderFolderList,
   selectInitialFolder
 } from "./js/folders.js";
-import { renderFrequentItems } from "./js/frequentItems.js";
 import {
   closeFolderImageSetModal,
   collapseAllFolderImageSets,
@@ -62,6 +61,7 @@ import {
   toggleTheme,
   updateApp
 } from "./js/options.js";
+import { renderQuickAccess, resetQuickAccessSections } from "./js/quickAccess.js";
 import {
   createNoteInSelectedFolder,
   deleteSelectedNote,
@@ -69,6 +69,7 @@ import {
   renderNoteList,
   scheduleAutoSave,
   toggleSelectedNotePin,
+  toggleSelectedNoteShortcut,
   updateActionButtons
 } from "./js/notes.js";
 import {
@@ -86,9 +87,10 @@ import {
 } from "./js/state.js";
 
 const MENU_TOGGLE_GUARD_MS = 300;
-const CONTROL_PANEL_VIEWPORT_MARGIN = 12;
+const HEADER_PANEL_VIEWPORT_MARGIN = 12;
 let lastAddPanelToggleAt = 0;
 let lastControlPanelToggleAt = 0;
+let lastQuickAccessToggleAt = 0;
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
@@ -117,12 +119,14 @@ function collectElements() {
   elements.selectedFolderName = document.getElementById("selectedFolderName");
   elements.screenBackButton = document.getElementById("screenBackButton");
   elements.screenHeaderTitle = document.getElementById("screenHeaderTitle");
+  elements.quickAccessToggle = document.getElementById("quickAccessToggle");
+  elements.quickAccessPanel = document.getElementById("quickAccessPanel");
+  elements.quickAccessSections = document.getElementById("quickAccessSections");
   elements.addPanelToggle = document.getElementById("addPanelToggle");
   elements.addPanel = document.getElementById("addPanel");
   elements.controlPanelToggle = document.getElementById("controlPanelToggle");
   elements.controlPanel = document.getElementById("controlPanel");
   elements.openSearchButton = document.getElementById("openSearchButton");
-  elements.frequentItemList = document.getElementById("frequentItemList");
   elements.searchInput = document.getElementById("searchInput");
   elements.searchResults = document.getElementById("searchResults");
   elements.addParentFolderButton = document.getElementById("addParentFolderButton");
@@ -142,6 +146,7 @@ function collectElements() {
   elements.editorModeSwitch = document.getElementById("editorModeSwitch");
   elements.noteActions = document.getElementById("noteActions");
   elements.togglePinButton = document.getElementById("togglePinButton");
+  elements.toggleShortcutButton = document.getElementById("toggleShortcutButton");
   elements.moveNoteButton = document.getElementById("moveNoteButton");
   elements.previewModeButton = document.getElementById("previewModeButton");
   elements.editModeButton = document.getElementById("editModeButton");
@@ -202,6 +207,7 @@ function collectElements() {
 }
 
 function registerEventListeners() {
+  registerQuickAccessToggle();
   registerAddPanelToggle();
   registerControlPanelToggle();
   setupImageCropModal();
@@ -225,6 +231,7 @@ function registerEventListeners() {
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
   elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
+  elements.toggleShortcutButton.addEventListener("click", toggleSelectedNoteShortcut);
   elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
@@ -292,9 +299,9 @@ function registerEventListeners() {
   });
   document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
   document.addEventListener("click", handleDocumentClick);
-  window.addEventListener("resize", updateControlPanelMaxHeight);
-  window.addEventListener("orientationchange", updateControlPanelMaxHeight);
-  window.visualViewport?.addEventListener("resize", updateControlPanelMaxHeight);
+  window.addEventListener("resize", updateOpenHeaderPanelMaxHeights);
+  window.addEventListener("orientationchange", updateOpenHeaderPanelMaxHeights);
+  window.visualViewport?.addEventListener("resize", updateOpenHeaderPanelMaxHeights);
   window.addEventListener("memo:openReusableImages", (event) => {
     openReusableImageModal({
       afterBlockId: event.detail?.afterBlockId || null
@@ -315,6 +322,21 @@ function registerEventListeners() {
     scheduleAutoSave();
     renderNoteList();
   });
+}
+
+function registerQuickAccessToggle() {
+  if (!elements.quickAccessToggle || !elements.quickAccessPanel) return;
+  elements.quickAccessToggle.addEventListener("pointerup", handleQuickAccessToggle, { passive: false });
+  elements.quickAccessToggle.addEventListener("click", handleQuickAccessToggle);
+}
+
+function handleQuickAccessToggle(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  const now = Date.now();
+  if (now - lastQuickAccessToggleAt < MENU_TOGGLE_GUARD_MS) return;
+  lastQuickAccessToggleAt = now;
+  setQuickAccessOpen(!state.quickAccessOpen);
 }
 
 function registerAddPanelToggle() {
@@ -356,9 +378,12 @@ function handleDocumentClick(event) {
 }
 
 function closeMenusFromOutsideEvent(event) {
-  if (!state.addPanelOpen && !state.controlPanelOpen) return;
+  if (!state.quickAccessOpen && !state.addPanelOpen && !state.controlPanelOpen) return;
   if (isInsideHeaderMenu(event.target)) return;
 
+  if (state.quickAccessOpen) {
+    setQuickAccessOpen(false);
+  }
   if (state.addPanelOpen) {
     setAddPanelOpen(false);
   }
@@ -373,6 +398,8 @@ function isInsideHeaderMenu(target) {
     (
       elements.addPanelToggle?.contains(target) ||
       elements.addPanel?.contains(target) ||
+      elements.quickAccessToggle?.contains(target) ||
+      elements.quickAccessPanel?.contains(target) ||
       elements.controlPanelToggle?.contains(target) ||
       elements.controlPanel?.contains(target)
     )
@@ -382,9 +409,12 @@ function isInsideHeaderMenu(target) {
 function initializeControlPanelState() {
   state.controlPanelOpen = false;
   state.addPanelOpen = false;
+  state.quickAccessOpen = false;
+  resetQuickAccessSections();
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
   renderControlPanelState();
   renderAddPanelState();
+  renderQuickAccessState();
 }
 
 function toggleControlPanel() {
@@ -431,8 +461,9 @@ function setControlPanelOpen(isOpen) {
   state.controlPanelOpen = isOpen;
   if (isOpen) {
     state.addPanelOpen = false;
+    state.quickAccessOpen = false;
     renderAddPanelState();
-    renderFrequentItems(openFrequentNote);
+    renderQuickAccessState();
   }
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, isOpen ? "true" : "false");
   renderControlPanelState();
@@ -442,10 +473,27 @@ function setAddPanelOpen(isOpen) {
   state.addPanelOpen = isOpen;
   if (isOpen) {
     state.controlPanelOpen = false;
+    state.quickAccessOpen = false;
     localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
     renderControlPanelState();
+    renderQuickAccessState();
   }
   renderAddPanelState();
+}
+
+function setQuickAccessOpen(isOpen) {
+  const wasOpen = state.quickAccessOpen;
+  state.quickAccessOpen = isOpen;
+  if (isOpen) {
+    state.addPanelOpen = false;
+    state.controlPanelOpen = false;
+    localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
+    if (!wasOpen) resetQuickAccessSections();
+    renderAddPanelState();
+    renderControlPanelState();
+    renderQuickAccess(openQuickAccessNote);
+  }
+  renderQuickAccessState();
 }
 
 function renderControlPanelState() {
@@ -464,14 +512,50 @@ function renderControlPanelState() {
 }
 
 function updateControlPanelMaxHeight() {
-  if (!state.controlPanelOpen || !elements.controlPanel) return;
+  updateHeaderPanelMaxHeight(
+    state.controlPanelOpen,
+    elements.controlPanel,
+    "--control-panel-max-height"
+  );
+}
 
-  const panelTop = elements.controlPanel.getBoundingClientRect().top;
+function renderQuickAccessState() {
+  if (!elements.quickAccessPanel || !elements.quickAccessToggle) return;
+  elements.quickAccessPanel.classList.toggle("collapsed", !state.quickAccessOpen);
+  if (state.quickAccessOpen) {
+    updateQuickAccessMaxHeight();
+    requestAnimationFrame(updateQuickAccessMaxHeight);
+  }
+  elements.quickAccessToggle.textContent = "🔖";
+  elements.quickAccessToggle.setAttribute(
+    "aria-label",
+    state.quickAccessOpen ? "クイックアクセスを閉じる" : "クイックアクセスを開く"
+  );
+  elements.quickAccessToggle.setAttribute("aria-expanded", state.quickAccessOpen ? "true" : "false");
+}
+
+function updateQuickAccessMaxHeight() {
+  updateHeaderPanelMaxHeight(
+    state.quickAccessOpen,
+    elements.quickAccessPanel,
+    "--quick-access-max-height"
+  );
+}
+
+function updateOpenHeaderPanelMaxHeights() {
+  updateControlPanelMaxHeight();
+  updateQuickAccessMaxHeight();
+}
+
+function updateHeaderPanelMaxHeight(isOpen, panel, propertyName) {
+  if (!isOpen || !panel) return;
+
+  const panelTop = panel.getBoundingClientRect().top;
   const viewportBottom = window.visualViewport
     ? window.visualViewport.offsetTop + window.visualViewport.height
     : window.innerHeight;
-  const availableHeight = Math.max(0, viewportBottom - panelTop - CONTROL_PANEL_VIEWPORT_MARGIN);
-  elements.controlPanel.style.setProperty("--control-panel-max-height", `${availableHeight}px`);
+  const availableHeight = Math.max(0, viewportBottom - panelTop - HEADER_PANEL_VIEWPORT_MARGIN);
+  panel.style.setProperty(propertyName, `${availableHeight}px`);
 }
 
 function renderAddPanelState() {
@@ -489,7 +573,7 @@ function renderAll() {
   renderFolderList();
   renderNoteList();
   renderSearchView();
-  renderFrequentItems(openFrequentNote);
+  renderQuickAccess(openQuickAccessNote);
   renderEditor();
   updateActionButtons();
   renderThemeButton();
@@ -498,10 +582,11 @@ function renderAll() {
   renderScreenHeader();
 }
 
-function openFrequentNote(noteId) {
-  return runMenuAction(() => openNoteById(noteId, {
+function openQuickAccessNote(noteId) {
+  setQuickAccessOpen(false);
+  return openNoteById(noteId, {
     clearSearchReturnState: true
-  }));
+  });
 }
 
 function scrollToLastBlock() {

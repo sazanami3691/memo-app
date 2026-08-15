@@ -149,5 +149,6 @@ function normalizeLoadedNotes() {
       note.blocks = [];
     }
     note.isPinned = note.isPinned === true;
+    note.isShortcut = note.isShortcut === true;
   });
 }
