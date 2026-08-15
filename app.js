@@ -379,7 +379,7 @@ function handleDocumentClick(event) {
 
 function closeMenusFromOutsideEvent(event) {
   if (!state.quickAccessOpen && !state.addPanelOpen && !state.controlPanelOpen) return;
-  if (isInsideHeaderMenu(event.target)) return;
+  if (isInsideHeaderMenu(event)) return;
 
   if (state.quickAccessOpen) {
     setQuickAccessOpen(false);
@@ -392,18 +392,20 @@ function closeMenusFromOutsideEvent(event) {
   }
 }
 
-function isInsideHeaderMenu(target) {
-  return Boolean(
-    target &&
-    (
-      elements.addPanelToggle?.contains(target) ||
-      elements.addPanel?.contains(target) ||
-      elements.quickAccessToggle?.contains(target) ||
-      elements.quickAccessPanel?.contains(target) ||
-      elements.controlPanelToggle?.contains(target) ||
-      elements.controlPanel?.contains(target)
-    )
-  );
+function isInsideHeaderMenu(event) {
+  const headerMenuElements = [
+    elements.addPanelToggle,
+    elements.addPanel,
+    elements.quickAccessToggle,
+    elements.quickAccessPanel,
+    elements.controlPanelToggle,
+    elements.controlPanel
+  ].filter(Boolean);
+  const path = typeof event.composedPath === "function" ? event.composedPath() : [];
+  if (path.some((node) => headerMenuElements.includes(node))) return true;
+
+  const target = event.target;
+  return Boolean(target && headerMenuElements.some((element) => element.contains(target)));
 }
 
 function initializeControlPanelState() {

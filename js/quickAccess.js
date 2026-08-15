@@ -58,7 +58,9 @@ function createQuickAccessSection(section, onOpenNote) {
   toggle.type = "button";
   toggle.className = "quick-access-section-toggle";
   toggle.setAttribute("aria-expanded", isExpanded ? "true" : "false");
-  toggle.addEventListener("click", () => {
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (state.quickAccessExpandedSections.has(section.id)) {
       state.quickAccessExpandedSections.delete(section.id);
     } else {
