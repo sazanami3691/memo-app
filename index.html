@@ -73,6 +73,8 @@
           <h3>メモ操作</h3>
           <div class="button-stack">
             <button id="addNoteButton" class="primary-button" type="button">新規メモ</button>
+            <button id="exportSingleNoteButton" type="button">このメモを書き出す</button>
+            <button id="importSingleNoteButton" type="button">メモファイルを読み込む</button>
             <button id="deleteSelectedNoteButton" class="danger-button" type="button">選択中メモを削除</button>
           </div>
         </section>
@@ -159,6 +161,7 @@
   <input id="reusableImageFileInput" class="hidden" type="file" accept="image/*">
   <input id="folderImageSetFileInput" class="hidden" type="file" accept="image/*" multiple>
   <input id="backupFileInput" class="hidden" type="file" accept="application/json,.json">
+  <input id="singleNoteFileInput" class="hidden" type="file" accept="application/json,.json,.memo.json">
 
   <div id="imageCropModal" class="image-crop-modal hidden" aria-hidden="true">
     <div class="image-crop-modal-content" role="dialog" aria-modal="true" aria-label="画像トリミング">

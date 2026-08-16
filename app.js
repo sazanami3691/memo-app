@@ -79,6 +79,12 @@ import {
   renderSearchView
 } from "./js/search.js";
 import {
+  beginSingleNoteImport,
+  exportSelectedNote,
+  handleSingleNoteFileSelected,
+  updateSingleNoteTransferButtons
+} from "./js/singleNoteTransfer.js";
+import {
   CONTROL_PANEL_STORAGE_KEY,
   DRAWING_SIZES,
   elements,
@@ -141,6 +147,9 @@ function collectElements() {
   elements.mzTextPreviewToggleButton = document.getElementById("mzTextPreviewToggleButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
+  elements.exportSingleNoteButton = document.getElementById("exportSingleNoteButton");
+  elements.importSingleNoteButton = document.getElementById("importSingleNoteButton");
+  elements.singleNoteFileInput = document.getElementById("singleNoteFileInput");
   elements.deleteSelectedNoteButton = document.getElementById("deleteSelectedNoteButton");
   elements.emptyEditorMessage = document.getElementById("emptyEditorMessage");
   elements.editorModeSwitch = document.getElementById("editorModeSwitch");
@@ -223,6 +232,9 @@ function registerEventListeners() {
     elements.backupFileInput.click();
   }));
   elements.backupFileInput.addEventListener("change", handleBackupFileSelected);
+  elements.exportSingleNoteButton.addEventListener("click", () => runMenuAction(exportSelectedNote));
+  elements.importSingleNoteButton.addEventListener("click", () => runMenuAction(beginSingleNoteImport));
+  elements.singleNoteFileInput.addEventListener("change", handleSingleNoteFileSelected);
   elements.registerReusableImageButton.addEventListener("click", () => runMenuAction(registerReusableImage));
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
@@ -576,6 +588,7 @@ function renderAll() {
   renderQuickAccess(openQuickAccessNote);
   renderEditor();
   updateActionButtons();
+  updateSingleNoteTransferButtons();
   renderThemeButton();
   renderMzTextPreviewButton();
   renderAppView();

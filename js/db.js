@@ -69,6 +69,37 @@ export function saveAsset(asset) {
   return putToStore(STORE_ASSETS, asset);
 }
 
+export function addNoteBundle(note, assets) {
+  return new Promise((resolve, reject) => {
+    let transaction;
+    let operationError = null;
+
+    try {
+      transaction = state.db.transaction([STORE_ASSETS, STORE_NOTES], "readwrite");
+      transaction.oncomplete = () => resolve({ note, assets });
+      transaction.onabort = () => {
+        reject(operationError || transaction.error || new Error("メモの保存処理が中断されました。"));
+      };
+
+      const assetStore = transaction.objectStore(STORE_ASSETS);
+      assets.forEach((asset) => {
+        const request = assetStore.add(asset);
+        request.onerror = () => {
+          if (!operationError) operationError = request.error;
+        };
+      });
+
+      const noteRequest = transaction.objectStore(STORE_NOTES).add(note);
+      noteRequest.onerror = () => {
+        if (!operationError) operationError = noteRequest.error;
+      };
+    } catch (error) {
+      transaction?.abort();
+      reject(error);
+    }
+  });
+}
+
 export function deleteAsset(assetId) {
   return deleteFromStore(STORE_ASSETS, assetId);
 }
