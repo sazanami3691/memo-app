@@ -94,9 +94,11 @@ import {
 
 const MENU_TOGGLE_GUARD_MS = 300;
 const HEADER_PANEL_VIEWPORT_MARGIN = 12;
+const BOTTOM_EDGE_TAP_MOVE_LIMIT = 10;
 let lastAddPanelToggleAt = 0;
 let lastControlPanelToggleAt = 0;
 let lastQuickAccessToggleAt = 0;
+let bottomEdgePointer = null;
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
@@ -169,6 +171,7 @@ function collectElements() {
   elements.addFolderImageSetBlockButton = document.getElementById("addFolderImageSetBlockButton");
   elements.addDrawingBlockButton = document.getElementById("addDrawingBlockButton");
   elements.scrollToLastBlockButton = document.getElementById("scrollToLastBlockButton");
+  elements.bottomEdgeScrollShortcut = document.getElementById("bottomEdgeScrollShortcut");
   elements.imageFileInput = document.getElementById("imageFileInput");
   elements.reusableImageFileInput = document.getElementById("reusableImageFileInput");
   elements.folderImageSetFileInput = document.getElementById("folderImageSetFileInput");
@@ -260,6 +263,10 @@ function registerEventListeners() {
   elements.addFolderImageSetBlockButton.addEventListener("click", () => runAddMenuAction(openFolderImageSetModal));
   elements.addDrawingBlockButton.addEventListener("click", () => runAddMenuAction(addDrawingBlock));
   elements.scrollToLastBlockButton.addEventListener("click", () => runAddMenuAction(scrollToLastBlock));
+  elements.bottomEdgeScrollShortcut.addEventListener("pointerdown", handleBottomEdgePointerDown);
+  window.addEventListener("pointermove", handleBottomEdgePointerMove, { passive: true });
+  window.addEventListener("pointerup", handleBottomEdgePointerUp, { passive: false });
+  window.addEventListener("pointercancel", resetBottomEdgePointer, { passive: true });
   elements.imageFileInput.addEventListener("change", handleImageFileSelected);
   elements.reusableImageFileInput.addEventListener("change", handleReusableImageFileSelected);
   elements.folderImageSetFileInput.addEventListener("change", handleFolderImageSetFilesSelected);
@@ -481,6 +488,7 @@ function setControlPanelOpen(isOpen) {
   }
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, isOpen ? "true" : "false");
   renderControlPanelState();
+  renderBottomEdgeScrollShortcut();
 }
 
 function setAddPanelOpen(isOpen) {
@@ -493,6 +501,7 @@ function setAddPanelOpen(isOpen) {
     renderQuickAccessState();
   }
   renderAddPanelState();
+  renderBottomEdgeScrollShortcut();
 }
 
 function setQuickAccessOpen(isOpen) {
@@ -506,6 +515,7 @@ function setQuickAccessOpen(isOpen) {
     renderQuickAccess(openQuickAccessNote);
   }
   renderQuickAccessState();
+  renderBottomEdgeScrollShortcut();
 }
 
 function renderControlPanelState() {
@@ -621,11 +631,76 @@ function scrollToLastBlock() {
   window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
 }
 
+function handleBottomEdgePointerDown(event) {
+  if (!event.isPrimary || !canUseBottomEdgeScrollShortcut()) return;
+  bottomEdgePointer = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    moved: false
+  };
+}
+
+function handleBottomEdgePointerMove(event) {
+  if (!bottomEdgePointer || event.pointerId !== bottomEdgePointer.pointerId) return;
+  const distance = Math.hypot(
+    event.clientX - bottomEdgePointer.startX,
+    event.clientY - bottomEdgePointer.startY
+  );
+  if (distance > BOTTOM_EDGE_TAP_MOVE_LIMIT) {
+    bottomEdgePointer.moved = true;
+  }
+}
+
+function handleBottomEdgePointerUp(event) {
+  if (!bottomEdgePointer || event.pointerId !== bottomEdgePointer.pointerId) return;
+  const shouldScroll = !bottomEdgePointer.moved && canUseBottomEdgeScrollShortcut();
+  resetBottomEdgePointer();
+  if (!shouldScroll) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  scrollToLastBlock();
+}
+
+function resetBottomEdgePointer() {
+  bottomEdgePointer = null;
+}
+
+function canUseBottomEdgeScrollShortcut() {
+  if (state.appView !== "editor" || !state.selectedNoteId) return false;
+  if (isHeaderMenuOpen()) return false;
+
+  return [
+    elements.imageCropModal,
+    elements.imageModal,
+    elements.drawingModal,
+    elements.moveNoteModal,
+    elements.reusableImageModal,
+    elements.folderImageSetModal
+  ].every((modal) => !modal || modal.classList.contains("hidden"));
+}
+
+function renderBottomEdgeScrollShortcut() {
+  if (!elements.bottomEdgeScrollShortcut) return;
+  const isEditorView = state.appView === "editor" && Boolean(state.selectedNoteId);
+  const isAvailable = isEditorView && !isHeaderMenuOpen();
+  elements.bottomEdgeScrollShortcut.classList.toggle("hidden", !isAvailable);
+  elements.bottomEdgeScrollShortcut.disabled = !isAvailable;
+  elements.bottomEdgeScrollShortcut.setAttribute("aria-hidden", isAvailable ? "false" : "true");
+  if (!isAvailable) resetBottomEdgePointer();
+}
+
+function isHeaderMenuOpen() {
+  return state.quickAccessOpen || state.addPanelOpen || state.controlPanelOpen;
+}
+
 function renderAppView() {
   elements.folderPanel.classList.toggle("hidden-screen", state.appView !== "folders");
   elements.noteListPanel.classList.toggle("hidden-screen", state.appView !== "notes");
   elements.searchPanel.classList.toggle("hidden-screen", state.appView !== "search");
   elements.editorPanel.classList.toggle("hidden-screen", state.appView !== "editor");
+  renderBottomEdgeScrollShortcut();
 }
 
 function renderScreenHeader() {
