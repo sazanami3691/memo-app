@@ -32,6 +32,7 @@ body.dark-theme .control-panel,
 body.dark-theme .quick-access-panel,
 body.dark-theme .column,
 body.dark-theme .move-note-modal-content,
+body.dark-theme .shortcut-settings-modal-content,
 body.dark-theme .reusable-image-modal-content,
 body.dark-theme .drawing-modal-content {
   background: var(--panel);

@@ -4,6 +4,8 @@ import { collectAssetIdsFromNotes, deleteUnusedAssets } from "./assets.js";
 import { createTextBlock, renderBlock, renderPreviewBlock } from "./blocks.js";
 import { deleteNote, saveNote } from "./db.js";
 import { getParentFolderForNote, getSelectedFolder } from "./folders.js";
+import { getNoteShortcutGroupCount } from "./shortcutSettings.js";
+import { removeNotesFromShortcutGroups } from "./shortcutGroups.js";
 import { AUTO_SAVE_DELAY, appActions, elements, state } from "./state.js";
 import { createEmptyList, createId, formatDate } from "./utils.js";
 
@@ -50,6 +52,13 @@ export async function deleteNoteById(noteId) {
   if (!confirm(`「${note.title || "無題"}」を削除します。よろしいですか？`)) return;
 
   const maybeUnusedAssetIds = collectAssetIdsFromNotes([note]);
+  try {
+    await removeNotesFromShortcutGroups([noteId]);
+  } catch (error) {
+    console.error(error);
+    alert("ショートカットグループの更新に失敗したため、メモを削除できませんでした。");
+    return;
+  }
   await deleteNote(noteId);
   state.notes = state.notes.filter((item) => item.id !== noteId);
   await deleteUnusedAssets(maybeUnusedAssetIds);
@@ -151,8 +160,9 @@ export function renderEditor() {
   elements.togglePinButton.textContent = note.isPinned === true
     ? "★ お気に入り解除"
     : "☆ お気に入り";
-  elements.toggleShortcutButton.textContent = note.isShortcut === true
-    ? "🔖 ショートカット解除"
+  const shortcutGroupCount = getNoteShortcutGroupCount(note.id);
+  elements.toggleShortcutButton.textContent = shortcutGroupCount > 0
+    ? `🔖 ショートカット設定（${shortcutGroupCount}）`
     : "🔖 ショートカットに追加";
   renderEditorModeSwitch();
   if (state.editorMode === "edit") {
@@ -225,16 +235,6 @@ export async function toggleSelectedNotePin() {
   if (!note) return;
 
   note.isPinned = note.isPinned !== true;
-  note.updatedAt = Date.now();
-  await saveNote(note);
-  appActions.renderAll();
-}
-
-export async function toggleSelectedNoteShortcut() {
-  const note = getSelectedNote();
-  if (!note) return;
-
-  note.isShortcut = note.isShortcut !== true;
   note.updatedAt = Date.now();
   await saveNote(note);
   appActions.renderAll();

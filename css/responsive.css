@@ -55,6 +55,18 @@
     padding: 10px;
   }
 
+  .shortcut-settings-modal {
+    align-items: stretch;
+    padding: 8px;
+  }
+
+  .shortcut-settings-modal-content {
+    width: 100%;
+    max-height: calc(100vh - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: 10px;
+  }
+
   .folder-image-set-toolbar {
     align-items: stretch;
   }

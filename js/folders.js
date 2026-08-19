@@ -6,6 +6,7 @@ import {
   deleteUnusedAssets
 } from "./assets.js";
 import { deleteFolder, deleteNote, saveFolder } from "./db.js";
+import { removeNotesFromShortcutGroups } from "./shortcutGroups.js";
 import { appActions, elements, state } from "./state.js";
 import { createEmptyList, createId, formatDate, normalizeName } from "./utils.js";
 
@@ -128,6 +129,14 @@ export async function deleteSelectedFolder() {
 
   const message = `「${folder.name}」を削除します。\n子フォルダと中のメモも削除されます。よろしいですか？`;
   if (!confirm(message)) return;
+
+  try {
+    await removeNotesFromShortcutGroups(targetNoteIds);
+  } catch (error) {
+    console.error(error);
+    alert("ショートカットグループの更新に失敗したため、フォルダを削除できませんでした。");
+    return;
+  }
 
   for (const noteId of targetNoteIds) {
     await deleteNote(noteId);

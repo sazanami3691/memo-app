@@ -188,6 +188,34 @@
   padding: 4px 0;
 }
 
+.quick-access-group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 0 8px 28px;
+}
+
+.quick-access-group-actions button {
+  flex: 1 1 110px;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+}
+
+.quick-access-groups-empty {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  padding: 10px 4px;
+  font-size: 0.82rem;
+}
+
+.quick-access-add-group {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
 .folder-list,
 .note-list,
 .block-list {

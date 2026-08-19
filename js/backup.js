@@ -15,6 +15,13 @@ import { closeImageModal } from "./imageBlocks.js";
 import { ensureInitialFolder, selectInitialFolder } from "./folders.js";
 import { setSaveStatus } from "./notes.js";
 import {
+  applyShortcutFlagsToNotes,
+  getShortcutGroupsForBackup,
+  replaceShortcutGroups,
+  resolveShortcutGroupsForRestore,
+  validateShortcutGroups
+} from "./shortcutGroups.js";
+import {
   BACKUP_APP_NAME,
   BACKUP_VERSION,
   STORE_ASSETS,
@@ -45,7 +52,8 @@ export async function exportBackup() {
           ...note,
           isShortcut: note.isShortcut === true
         })),
-        assets: await getAllAssets()
+        assets: await getAllAssets(),
+        shortcutGroups: getShortcutGroupsForBackup()
       }
     };
 
@@ -124,6 +132,13 @@ export function validateBackupData(backup) {
   if (!backup.data.assets.every((asset) => asset && asset.id)) {
     throw new Error("idのないassetが含まれています。");
   }
+
+  if (Object.prototype.hasOwnProperty.call(backup.data, "shortcutGroups")) {
+    validateShortcutGroups(
+      backup.data.shortcutGroups,
+      new Set(backup.data.notes.map((note) => note.id))
+    );
+  }
 }
 
 export async function clearAllData() {
@@ -133,17 +148,28 @@ export async function clearAllData() {
 }
 
 export async function restoreBackupData(backupData) {
+  const shortcutGroups = resolveShortcutGroupsForRestore(
+    backupData.shortcutGroups,
+    backupData.notes
+  );
+  const notes = applyShortcutFlagsToNotes(backupData.notes, shortcutGroups);
   await clearAllData();
 
   for (const folder of backupData.folders) {
     await saveFolder(folder);
   }
 
-  for (const note of backupData.notes) {
+  for (const note of notes) {
     await saveNote(note);
   }
 
   for (const asset of backupData.assets) {
     await saveAsset(asset);
   }
+
+  await replaceShortcutGroups(shortcutGroups, {
+    notes,
+    syncFlags: false,
+    resetExpandedSections: true
+  });
 }

@@ -62,6 +62,13 @@ import {
   updateApp
 } from "./js/options.js";
 import { renderQuickAccess, resetQuickAccessSections } from "./js/quickAccess.js";
+import { initializeShortcutGroups } from "./js/shortcutGroups.js";
+import {
+  closeShortcutSettingsModal,
+  createShortcutGroupFromSettings,
+  openShortcutSettingsModal,
+  saveShortcutSettings
+} from "./js/shortcutSettings.js";
 import {
   createNoteInSelectedFolder,
   deleteSelectedNote,
@@ -69,7 +76,6 @@ import {
   renderNoteList,
   scheduleAutoSave,
   toggleSelectedNotePin,
-  toggleSelectedNoteShortcut,
   updateActionButtons
 } from "./js/notes.js";
 import {
@@ -112,6 +118,8 @@ async function initializeApp() {
 
   await openDB();
   await loadData();
+  await initializeShortcutGroups();
+  resetQuickAccessSections();
   await ensureInitialFolder();
   selectInitialFolder();
   renderAll();
@@ -216,6 +224,13 @@ function collectElements() {
   elements.collapseAllFolderImageSetsButton = document.getElementById("collapseAllFolderImageSetsButton");
   elements.folderImageSetList = document.getElementById("folderImageSetList");
   elements.folderImageSetModalCancelButton = document.getElementById("folderImageSetModalCancelButton");
+  elements.shortcutSettingsModal = document.getElementById("shortcutSettingsModal");
+  elements.shortcutSettingsModalCloseButton = document.getElementById("shortcutSettingsModalCloseButton");
+  elements.shortcutSettingsNoteTitle = document.getElementById("shortcutSettingsNoteTitle");
+  elements.shortcutSettingsGroupList = document.getElementById("shortcutSettingsGroupList");
+  elements.createShortcutGroupFromSettingsButton = document.getElementById("createShortcutGroupFromSettingsButton");
+  elements.shortcutSettingsCancelButton = document.getElementById("shortcutSettingsCancelButton");
+  elements.shortcutSettingsSaveButton = document.getElementById("shortcutSettingsSaveButton");
 }
 
 function registerEventListeners() {
@@ -246,7 +261,7 @@ function registerEventListeners() {
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
   elements.togglePinButton.addEventListener("click", toggleSelectedNotePin);
-  elements.toggleShortcutButton.addEventListener("click", toggleSelectedNoteShortcut);
+  elements.toggleShortcutButton.addEventListener("click", openShortcutSettingsModal);
   elements.moveNoteButton.addEventListener("click", openMoveNoteModal);
   elements.previewModeButton.addEventListener("click", () => {
     state.editorMode = "preview";
@@ -314,6 +329,18 @@ function registerEventListeners() {
   elements.folderImageSetModal.addEventListener("click", (event) => {
     if (event.target === elements.folderImageSetModal) {
       closeFolderImageSetModal();
+    }
+  });
+  elements.shortcutSettingsModalCloseButton.addEventListener("click", closeShortcutSettingsModal);
+  elements.shortcutSettingsCancelButton.addEventListener("click", closeShortcutSettingsModal);
+  elements.shortcutSettingsSaveButton.addEventListener("click", saveShortcutSettings);
+  elements.createShortcutGroupFromSettingsButton.addEventListener(
+    "click",
+    createShortcutGroupFromSettings
+  );
+  elements.shortcutSettingsModal.addEventListener("click", (event) => {
+    if (event.target === elements.shortcutSettingsModal) {
+      closeShortcutSettingsModal();
     }
   });
   document.addEventListener("pointerup", handleDocumentPointerUp, { passive: true });
@@ -431,7 +458,6 @@ function initializeControlPanelState() {
   state.controlPanelOpen = false;
   state.addPanelOpen = false;
   state.quickAccessOpen = false;
-  resetQuickAccessSections();
   localStorage.setItem(CONTROL_PANEL_STORAGE_KEY, "false");
   renderControlPanelState();
   renderAddPanelState();
@@ -677,7 +703,8 @@ function canUseBottomEdgeScrollShortcut() {
     elements.drawingModal,
     elements.moveNoteModal,
     elements.reusableImageModal,
-    elements.folderImageSetModal
+    elements.folderImageSetModal,
+    elements.shortcutSettingsModal
   ].every((modal) => !modal || modal.classList.contains("hidden"));
 }
 
