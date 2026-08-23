@@ -61,8 +61,11 @@ import {
   toggleTheme,
   updateApp
 } from "./js/options.js";
-import { renderQuickAccess, resetQuickAccessSections } from "./js/quickAccess.js";
-import { initializeShortcutGroups } from "./js/shortcutGroups.js";
+import { renderQuickAccess } from "./js/quickAccess.js";
+import {
+  initializeQuickAccessExpandedSections,
+  initializeShortcutGroups
+} from "./js/shortcutGroups.js";
 import {
   closeShortcutSettingsModal,
   createShortcutGroupFromSettings,
@@ -119,7 +122,7 @@ async function initializeApp() {
   await openDB();
   await loadData();
   await initializeShortcutGroups();
-  resetQuickAccessSections();
+  initializeQuickAccessExpandedSections();
   await ensureInitialFolder();
   selectInitialFolder();
   renderAll();

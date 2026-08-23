@@ -5,18 +5,12 @@ import {
   addShortcutGroup,
   deleteShortcutGroup,
   getShortcutGroupSectionId,
-  renameShortcutGroup
+  renameShortcutGroup,
+  saveQuickAccessExpandedSections
 } from "./shortcutGroups.js";
 import { appActions, elements, state } from "./state.js";
 
 const FAVORITES_SECTION = "favorites";
-
-export function resetQuickAccessSections() {
-  state.quickAccessExpandedSections = new Set([
-    FAVORITES_SECTION,
-    ...state.shortcutGroups.map((group) => getShortcutGroupSectionId(group.id))
-  ]);
-}
 
 export function renderQuickAccess(onOpenNote) {
   if (!elements.quickAccessSections) return;
@@ -92,6 +86,7 @@ function createQuickAccessSection(section, onOpenNote) {
     } else {
       state.quickAccessExpandedSections.add(section.id);
     }
+    saveQuickAccessExpandedSections();
     renderQuickAccess(onOpenNote);
   });
 

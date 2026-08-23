@@ -2,6 +2,7 @@
 
 import { saveNote } from "./db.js";
 import {
+  QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY,
   SHORTCUT_GROUPS_STORAGE_KEY,
   state
 } from "./state.js";
@@ -9,10 +10,74 @@ import { createId } from "./utils.js";
 
 export const DEFAULT_SHORTCUT_GROUP_NAME = "ショートカット";
 export const SHORTCUT_GROUP_NAME_MAX_LENGTH = 40;
+const FAVORITES_SECTION = "favorites";
 const SHORTCUT_GROUP_SECTION_PREFIX = "shortcut-group:";
 
 export function getShortcutGroupSectionId(groupId) {
   return `${SHORTCUT_GROUP_SECTION_PREFIX}${groupId}`;
+}
+
+export function getDefaultQuickAccessExpandedSectionIds(groups = state.shortcutGroups) {
+  return [
+    FAVORITES_SECTION,
+    ...groups.map((group) => getShortcutGroupSectionId(group.id))
+  ];
+}
+
+export function normalizeQuickAccessExpandedSectionIds(
+  value,
+  groups = state.shortcutGroups
+) {
+  if (!Array.isArray(value)) {
+    throw new Error("クイックアクセスの折りたたみ設定が配列ではありません。");
+  }
+  const validSectionIds = new Set(getDefaultQuickAccessExpandedSectionIds(groups));
+  return [...new Set(value.filter((sectionId) => (
+    typeof sectionId === "string" && validSectionIds.has(sectionId)
+  )))];
+}
+
+export function initializeQuickAccessExpandedSections({
+  storage = globalThis.localStorage
+} = {}) {
+  const defaultSectionIds = getDefaultQuickAccessExpandedSectionIds();
+  try {
+    const rawValue = storage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY);
+    if (rawValue === null) {
+      state.quickAccessExpandedSections = new Set(defaultSectionIds);
+      saveQuickAccessExpandedSections(storage);
+      return state.quickAccessExpandedSections;
+    }
+
+    const parsed = JSON.parse(rawValue);
+    const normalized = normalizeQuickAccessExpandedSectionIds(parsed);
+    state.quickAccessExpandedSections = new Set(normalized);
+    if (JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      saveQuickAccessExpandedSections(storage);
+    }
+  } catch (error) {
+    console.warn("クイックアクセスの折りたたみ設定を読み込めませんでした。", error);
+    state.quickAccessExpandedSections = new Set(defaultSectionIds);
+    saveQuickAccessExpandedSections(storage);
+  }
+  return state.quickAccessExpandedSections;
+}
+
+export function saveQuickAccessExpandedSections(storage = globalThis.localStorage) {
+  try {
+    const normalized = normalizeQuickAccessExpandedSectionIds(
+      [...state.quickAccessExpandedSections]
+    );
+    state.quickAccessExpandedSections = new Set(normalized);
+    storage.setItem(
+      QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY,
+      JSON.stringify(normalized)
+    );
+    return true;
+  } catch (error) {
+    console.warn("クイックアクセスの折りたたみ設定を保存できませんでした。", error);
+    return false;
+  }
 }
 
 export function normalizeShortcutGroupName(value) {
@@ -236,15 +301,24 @@ export async function replaceShortcutGroups(groups, {
   syncFlags = true,
   resetExpandedSections = false
 } = {}) {
+  const previousGroupIds = new Set(state.shortcutGroups.map((group) => group.id));
   const validNoteIds = new Set(notes.map((note) => note.id));
   const normalized = normalizeShortcutGroups(groups, validNoteIds);
   saveShortcutGroupsToStorage(normalized, storage);
   state.shortcutGroups = normalized;
   if (resetExpandedSections) {
-    state.quickAccessExpandedSections = new Set([
-      "favorites",
-      ...normalized.map((group) => getShortcutGroupSectionId(group.id))
-    ]);
+    const nextExpandedSections = new Set();
+    if (state.quickAccessExpandedSections.has(FAVORITES_SECTION)) {
+      nextExpandedSections.add(FAVORITES_SECTION);
+    }
+    normalized.forEach((group) => {
+      const sectionId = getShortcutGroupSectionId(group.id);
+      if (!previousGroupIds.has(group.id) || state.quickAccessExpandedSections.has(sectionId)) {
+        nextExpandedSections.add(sectionId);
+      }
+    });
+    state.quickAccessExpandedSections = nextExpandedSections;
+    saveQuickAccessExpandedSections(storage);
   }
   if (syncFlags) {
     await synchronizeShortcutFlags(notes, normalized, saveNoteFn);
@@ -265,6 +339,7 @@ export async function addShortcutGroup(name, options = {}) {
   };
   await replaceShortcutGroups([...state.shortcutGroups, group], options);
   state.quickAccessExpandedSections.add(getShortcutGroupSectionId(group.id));
+  saveQuickAccessExpandedSections(options.storage);
   return group;
 }
 
@@ -290,6 +365,7 @@ export async function deleteShortcutGroup(groupId, options = {}) {
     .map(cloneGroup);
   await replaceShortcutGroups(nextGroups, options);
   state.quickAccessExpandedSections.delete(getShortcutGroupSectionId(groupId));
+  saveQuickAccessExpandedSections(options.storage);
   return target;
 }
 

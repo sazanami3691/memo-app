@@ -5,17 +5,25 @@ import {
   applyShortcutFlagsToNotes,
   createLegacyShortcutGroups,
   deleteShortcutGroup,
+  getDefaultQuickAccessExpandedSectionIds,
   getNoteShortcutGroupIds,
+  initializeQuickAccessExpandedSections,
   initializeShortcutGroups,
+  normalizeQuickAccessExpandedSectionIds,
   removeNoteIdsFromShortcutGroups,
   replaceShortcutGroups,
   renameShortcutGroup,
   resolveShortcutGroupsForRestore,
+  saveQuickAccessExpandedSections,
   setNoteShortcutGroupIds,
   updateNoteShortcutGroups,
   validateShortcutGroups
 } from "../js/shortcutGroups.js";
-import { SHORTCUT_GROUPS_STORAGE_KEY, state } from "../js/state.js";
+import {
+  QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY,
+  SHORTCUT_GROUPS_STORAGE_KEY,
+  state
+} from "../js/state.js";
 
 function createMemoryStorage(initialValue = null) {
   const values = new Map();
@@ -97,6 +105,77 @@ const characterGroup = {
   createdAt: 201,
   updatedAt: 201
 };
+
+const foldStorage = createMemoryStorage();
+state.shortcutGroups = [workGroup, characterGroup];
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+assert.deepEqual(
+  [...state.quickAccessExpandedSections],
+  getDefaultQuickAccessExpandedSectionIds()
+);
+
+foldStorage.setItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY, "[]");
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+assert.deepEqual([...state.quickAccessExpandedSections], []);
+
+foldStorage.setItem(
+  QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY,
+  JSON.stringify([
+    "favorites",
+    "shortcut-group:shortcutGroup_work",
+    "shortcut-group:deleted",
+    "favorites",
+    123
+  ])
+);
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+assert.deepEqual(
+  [...state.quickAccessExpandedSections],
+  ["favorites", "shortcut-group:shortcutGroup_work"]
+);
+assert.deepEqual(
+  JSON.parse(foldStorage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY)),
+  ["favorites", "shortcut-group:shortcutGroup_work"]
+);
+
+state.quickAccessExpandedSections = new Set(getDefaultQuickAccessExpandedSectionIds());
+assert.equal(saveQuickAccessExpandedSections(foldStorage), true);
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+assert.deepEqual(
+  [...state.quickAccessExpandedSections],
+  getDefaultQuickAccessExpandedSectionIds()
+);
+
+const originalFoldWarn = console.warn;
+console.warn = () => {};
+foldStorage.setItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY, "{broken-json");
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+console.warn = originalFoldWarn;
+assert.deepEqual(
+  [...state.quickAccessExpandedSections],
+  getDefaultQuickAccessExpandedSectionIds()
+);
+
+console.warn = () => {};
+foldStorage.setItem(
+  QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY,
+  JSON.stringify({ favorites: true })
+);
+initializeQuickAccessExpandedSections({ storage: foldStorage });
+console.warn = originalFoldWarn;
+assert.deepEqual(
+  [...state.quickAccessExpandedSections],
+  getDefaultQuickAccessExpandedSectionIds()
+);
+assert.deepEqual(
+  JSON.parse(foldStorage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY)),
+  getDefaultQuickAccessExpandedSectionIds()
+);
+assert.throws(
+  () => normalizeQuickAccessExpandedSectionIds("favorites", state.shortcutGroups),
+  /配列ではありません/
+);
+
 let groups = setNoteShortcutGroupIds(
   [workGroup, characterGroup],
   "note_a",
@@ -157,6 +236,11 @@ assert.equal(
   state.quickAccessExpandedSections.has(`shortcut-group:${runtimeCharacterGroup.id}`),
   true
 );
+assert.equal(
+  JSON.parse(runtimeStorage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY))
+    .includes(`shortcut-group:${runtimeCharacterGroup.id}`),
+  true
+);
 
 await updateNoteShortcutGroups("note_runtime", [runtimeWorkGroup.id, runtimeCharacterGroup.id], {
   ...runtimeOptions,
@@ -171,6 +255,10 @@ assert.deepEqual(getNoteShortcutGroupIds(state.shortcutGroups, "note_runtime"), 
 await deleteShortcutGroup(runtimeCharacterGroup.id, runtimeOptions);
 assert.equal(state.notes[0].isShortcut, false);
 assert.deepEqual(state.shortcutGroups, []);
+assert.deepEqual(
+  JSON.parse(runtimeStorage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY)),
+  ["favorites"]
+);
 assert.ok(savedRuntimeNotes.some((note) => note.id === "note_runtime" && note.isShortcut === true));
 assert.ok(savedRuntimeNotes.some((note) => note.id === "note_runtime" && note.isShortcut === false));
 
@@ -231,6 +319,10 @@ assert.equal(state.quickAccessExpandedSections.has("shortcut-group:old"), false)
 assert.equal(
   state.quickAccessExpandedSections.has("shortcut-group:shortcutGroup_restored_legacy"),
   true
+);
+assert.deepEqual(
+  JSON.parse(restoreStorage.getItem(QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY)),
+  ["favorites", "shortcut-group:shortcutGroup_restored_legacy"]
 );
 
 const oldBackup = {
