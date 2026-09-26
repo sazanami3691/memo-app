@@ -17,6 +17,7 @@ export const MZ_TEXT_PREVIEW_GLOBAL_STORAGE_KEY = "memoAppMzTextPreviewEnabled";
 export const SHORTCUT_GROUPS_STORAGE_KEY = "memoAppShortcutGroups";
 export const QUICK_ACCESS_EXPANDED_SECTIONS_STORAGE_KEY =
   "memoAppQuickAccessExpandedSections";
+export const VOICE_MEMO_MODE_STORAGE_KEY = "memoAppVoiceMemoMiniMode";
 
 export const IMAGE_MAX_SIZE = 1200;
 export const IMAGE_JPEG_QUALITY = 0.82;
@@ -46,6 +47,7 @@ export const state = {
   controlPanelOpen: false,
   addPanelOpen: false,
   quickAccessOpen: false,
+  voiceMemoMiniMode: false,
   shortcutGroups: [],
   quickAccessExpandedSections: new Set(["favorites"]),
   shortcutSettingsNoteId: null,

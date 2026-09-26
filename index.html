@@ -91,6 +91,7 @@
           <h3>オプション</h3>
           <div class="button-stack">
             <button id="registerReusableImageButton" type="button">よく使う画像を登録</button>
+            <button id="openVoiceMemoButton" type="button">作画用音声メモ</button>
             <button id="updateAppButton" type="button">アプリを更新</button>
             <button id="themeToggleButton" type="button">ダークテーマに切替</button>
             <button id="mzTextPreviewToggleButton" type="button" aria-pressed="false">通常ブロックをMZ表示（全メモ）: OFF</button>
@@ -156,6 +157,17 @@
       </form>
     </section>
   </div>
+
+  <section id="voiceMemoBar" class="voice-memo-bar" aria-label="作画用音声メモ" hidden>
+    <span id="voiceMemoTitle" class="voice-memo-title">メモ未選択</span>
+    <button id="voiceMemoStartButton" class="voice-memo-start-button primary-button" type="button">🎙 音声入力</button>
+    <div class="voice-memo-feedback">
+      <span id="voiceMemoStatus" class="voice-memo-status" role="status" aria-live="polite"></span>
+      <span id="voiceMemoPreview" class="voice-memo-preview"></span>
+    </div>
+    <button id="voiceMemoStopButton" type="button">停止して保存</button>
+    <button id="voiceMemoExitButton" type="button" aria-label="通常表示へ戻る">戻る</button>
+  </section>
 
   <button
     id="bottomEdgeScrollShortcut"

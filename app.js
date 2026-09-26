@@ -100,6 +100,11 @@ import {
   setRenderAllAction,
   state
 } from "./js/state.js";
+import {
+  enterVoiceMemoMode,
+  initializeVoiceMemo,
+  renderVoiceMemo
+} from "./js/voiceMemo.js";
 
 const MENU_TOGGLE_GUARD_MS = 300;
 const HEADER_PANEL_VIEWPORT_MARGIN = 12;
@@ -116,6 +121,7 @@ async function initializeApp() {
   initializeTheme();
   initializeMzDisplayMode();
   initializeControlPanelState();
+  initializeVoiceMemo();
   registerEventListeners();
   setRenderAllAction(renderAll);
 
@@ -158,6 +164,14 @@ function collectElements() {
   elements.updateAppButton = document.getElementById("updateAppButton");
   elements.themeToggleButton = document.getElementById("themeToggleButton");
   elements.mzTextPreviewToggleButton = document.getElementById("mzTextPreviewToggleButton");
+  elements.openVoiceMemoButton = document.getElementById("openVoiceMemoButton");
+  elements.voiceMemoBar = document.getElementById("voiceMemoBar");
+  elements.voiceMemoTitle = document.getElementById("voiceMemoTitle");
+  elements.voiceMemoStartButton = document.getElementById("voiceMemoStartButton");
+  elements.voiceMemoStatus = document.getElementById("voiceMemoStatus");
+  elements.voiceMemoPreview = document.getElementById("voiceMemoPreview");
+  elements.voiceMemoStopButton = document.getElementById("voiceMemoStopButton");
+  elements.voiceMemoExitButton = document.getElementById("voiceMemoExitButton");
   elements.backupFileInput = document.getElementById("backupFileInput");
   elements.addNoteButton = document.getElementById("addNoteButton");
   elements.exportSingleNoteButton = document.getElementById("exportSingleNoteButton");
@@ -260,6 +274,7 @@ function registerEventListeners() {
   elements.updateAppButton.addEventListener("click", () => runMenuAction(updateApp));
   elements.themeToggleButton.addEventListener("click", () => runMenuAction(toggleTheme));
   elements.mzTextPreviewToggleButton.addEventListener("click", () => runMenuAction(toggleGlobalMzTextPreview));
+  elements.openVoiceMemoButton.addEventListener("click", () => runMenuAction(enterVoiceMemoMode));
   elements.addNoteButton.addEventListener("click", () => runMenuAction(createNoteInSelectedFolder));
   elements.deleteSelectedNoteButton.addEventListener("click", () => runMenuAction(deleteSelectedNote));
   elements.screenBackButton.addEventListener("click", handleScreenBack);
@@ -632,6 +647,7 @@ function renderAll() {
   renderMzTextPreviewButton();
   renderAppView();
   renderScreenHeader();
+  renderVoiceMemo();
 }
 
 function openQuickAccessNote(noteId) {

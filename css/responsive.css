@@ -88,3 +88,68 @@
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
+
+@media (max-width: 680px) {
+  .voice-memo-bar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 6px;
+  }
+
+  .voice-memo-title {
+    grid-column: 1 / 3;
+    grid-row: 1;
+  }
+
+  #voiceMemoExitButton {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .voice-memo-start-button {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .voice-memo-feedback {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  #voiceMemoStopButton {
+    grid-column: 3;
+    grid-row: 2;
+  }
+
+  .voice-memo-bar button {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 410px) {
+  .voice-memo-bar {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .voice-memo-title {
+    grid-column: 1;
+  }
+
+  #voiceMemoExitButton {
+    grid-column: 2;
+  }
+
+  .voice-memo-start-button {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  #voiceMemoStopButton {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .voice-memo-feedback {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+}
